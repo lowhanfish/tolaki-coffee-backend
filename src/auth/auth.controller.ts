@@ -1,15 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Res} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { AuthLoginDTO, AuthRegisterDTO } from './dto/auth.dto';
+
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() dto: CreateAuthDto) {
-    return this.authService.create(dto);
+  @Post('login')
+  create(@Body() dto: AuthLoginDTO) {
+    return this.authService.findOne(dto.username)
+  }
+
+  @Post('registration')
+  registrasi(@Body() body : AuthRegisterDTO){
+    return "Hy saya dari body"
   }
 
   
