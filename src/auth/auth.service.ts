@@ -1,17 +1,51 @@
 import { Injectable, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from 'src/prisma/prisma.service';
+import {JwtService} from "@nestjs/jwt"
+import {AuthRegisterDTO} from "./dto/auth.dto"
 
 
 @Injectable()
 export class AuthService {
 
+  constructor(
+    private prisma : PrismaService,
+    private jwt : JwtService
+  ){}
+
   
-  authRegister(){
+  async authRegister(dto: AuthRegisterDTO){
     // 1. Cek Akun (email/password) apakah sudah ada atau belum.
+    const userCheck = await this.prisma.user.findUnique({
+      where : {username : dto.username}
+    })
+
     // 2. Kalau sudah ada kembalikan Bad Request Exception.
+    if(userCheck) throw new BadRequestException("")
+    
     // 3. Hasing password dari dto menggunakan bcrypt.
+    const hashpassword = await bcrypt.hash(dto.password, 10)
+
     // 4. Store dto ke dalam database  dengan prisma, termasuk password yang telah di hasing.
-    // 5. Tangkap id dan username/email dari data yang baru saja kita masukkan ke database.
+    const userStore = await this.prisma.user.create({
+      data : {
+        email : dto.email,
+        username : dto.email,
+        name : dto.email,
+        password : dto.email,
+        createdAt : dto.email,
+      }
+    })
     // 6. Generate token (Access Token (AT): 15 menit, Refresh Token (RT) : 7 Hari) berdasarkan (id, username/email) dari data yang kita tangkap sebelumnya.
+    const token_at = await this.jwt.signAsync(
+      {sub:userStore.id, username: userStore.username},
+      { secret: process.env.JWT_ACCESS_SECRET, expiresIn:'15m' },
+    )
+
+    const token_rt = await this.jwt.signAsync(
+      {sub:userStore.id, username: userStore.username},
+      {secret:process.env.JWT_REFRESH_SECRET, expiresIn:'7d'}
+    )
     // 7. Hasing RT yang baru saja di generate. 
     // 8. Update tabel akun yang bersangkutan dengan mengubah RT hasil hashing.
     // 9. Set refreshToken ke dalam header HTTP Response sebagai HTTP-Only Cookie.
@@ -30,16 +64,36 @@ export class AuthService {
     // 7. Return accessToken (dan data user ringkas) di JSON Body response.
 
   }
-  authRT(){
+  authRefreshToken(){
 
   }
 
-  authProfile(){
+  authGetProfile(){
 
   }
   
   findOne(email : string){
     return `Hy saya dari services, username saya adalah ${email}`
+  }
+
+
+  async generateToken(userStore:AuthRegisterDTO){
+    const [at, rt] = await Promise.all([
+      this.jwt.signAsync(
+        {sub:userStore.id, username: userStore.username},
+        { secret: process.env.JWT_ACCESS_SECRET, expiresIn:'15m' },
+      ),
+      this.jwt.signAsync(
+        {sub:userStore.id, username: userStore.username},
+        { secret: process.env.JWT_ACCESS_SECRET, expiresIn:'15m' },
+      )
+    ])
+
+    return {
+      at : at,
+      rt : rt
+    }
+
   }
 
 }

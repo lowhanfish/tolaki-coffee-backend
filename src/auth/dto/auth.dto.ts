@@ -11,6 +11,10 @@ export class AuthLoginDTO {
 }
 export class AuthRegisterDTO {
 
+    @IsOptional()
+    @IsString()
+    id : string;
+
     @IsNotEmpty()
     @IsString()
     username : string;
