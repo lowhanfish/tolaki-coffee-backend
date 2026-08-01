@@ -13,7 +13,7 @@ export class AuthRegisterDTO {
 
     @IsOptional()
     @IsString()
-    id : string;
+    id? : string;
 
     @IsNotEmpty()
     @IsString()
@@ -26,17 +26,18 @@ export class AuthRegisterDTO {
     @IsOptional()
     @IsNotEmpty()
     @IsString()
-    name : string;
+    name? : string;
 
     @IsOptional()
     @IsNotEmpty()
     @IsString()
-    address : string;
+    address? : string;
 
     @IsNotEmpty()
     @IsString()
-    phone : string;
+    phone? : string;
 
+    @IsNotEmpty()
     @IsEmail()
     email : string;
 }
