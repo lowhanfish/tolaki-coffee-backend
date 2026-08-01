@@ -10,8 +10,23 @@ import { ProductModule } from './product/product.module';
 import { ProfileModule } from './profile/profile.module';
 
 
+import { ConfigModule } from '@nestjs/config';
+
+
 @Module({
-  imports: [AuthModule, PrismaModule, ContactModule, NewsModule, PartnerModule, ProductModule, ProfileModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // 👈 1. Tambahkan ini di imports agar env terbaca di seluruh modul
+    }),
+    AuthModule, 
+    PrismaModule, 
+    ContactModule, 
+    NewsModule, 
+    PartnerModule, 
+    ProductModule, 
+    ProfileModule
+
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
