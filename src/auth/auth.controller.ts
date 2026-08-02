@@ -9,7 +9,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async create(@Body() dto: AuthLoginDTO, @Res() res:Response) {
+  async create(@Body() dto: AuthLoginDTO, @Res({passthrough:true}) res:Response) {
     const {data, token} = await this.authService.authLogin(dto)
     await this.resCookie(res, token.rt)
 
