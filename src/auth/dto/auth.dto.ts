@@ -28,15 +28,6 @@ export class AuthRegisterDTO {
     @IsString()
     name? : string;
 
-    @IsOptional()
-    @IsNotEmpty()
-    @IsString()
-    address? : string;
-
-    @IsNotEmpty()
-    @IsString()
-    phone? : string;
-
     @IsNotEmpty()
     @IsEmail()
     email : string;

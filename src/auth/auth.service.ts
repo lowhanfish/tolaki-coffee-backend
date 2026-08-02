@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, UnauthorizedException, ForbiddenExcept
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import {JwtService} from "@nestjs/jwt"
-import {AuthRegisterDTO} from "./dto/auth.dto"
+import {AuthRegisterDTO, AuthLoginDTO} from "./dto/auth.dto"
 import {User} from './entities/user.entity'
 
 @Injectable()
@@ -37,8 +37,6 @@ export class AuthService {
         email : dto.email,
         username : dto.username,
         name : dto.name,
-        address : dto.address,
-        phone : dto.phone,
         password : hashpassword
       }
     })
@@ -55,15 +53,34 @@ export class AuthService {
   
   }
 
-  authLogin(){
+  async authLogin(dto : AuthLoginDTO){
 
     // 1. Cek Keberadaan User: Cari user di DB via Prisma berdasarkan email. Jika tidak ketemu = Throw UnauthorizedException('Invalid credentials').
+    const userCheck = await this.prisma.user.findUnique({
+      where : {username: dto.username}
+    })
+    if(!userCheck){
+      throw new UnauthorizedException("Username atau password tidak ditermukan")
+    }
     // 2. Verifikasi Password: Bandingkan password dari DTO dengan password (hash) di DB menggunakan bcrypt.compare(). Jika tidak cocok = Throw UnauthorizedException('Invalid credentials').
+    const isPasswordMatch = await bcrypt.compare(dto.password, userCheck.password)
+    if(!isPasswordMatch) throw new UnauthorizedException("Username atau pasword salah")
+
     // 3. Generate JWT Tokens: Buat accessToken (misal exp: 15m) dan refreshToken (misal exp: 7d).
+    const token = await this.generateToken(userCheck)
+
     // 4. Hash Refresh Token: Lakukan bcrypt.hash(refreshToken, 10).
+    const token_refresh = await bcrypt.hash(token.rt, 10)
+
     // 5. Update DB via Prisma: Simpan Hash Refresh Token ke field hashedRefreshToken milik user tersebut di database.
-    // 6. Set refreshToken ke dalam header HTTP Response sebagai HTTP-Only Cookie.
-    // 7. Return accessToken (dan data user ringkas) di JSON Body response.
+    await this.updateRT(userCheck.id, token_refresh)
+
+    const {hashedRT, password, ...data} = userCheck
+    
+    return {
+      data :data,
+      token : token
+    }
 
   }
   authRefreshToken(){
