@@ -12,6 +12,9 @@ import { ProfileModule } from './profile/profile.module';
 
 import { ConfigModule } from '@nestjs/config';
 
+import {APP_GUARD} from '@nestjs/core'
+import { AtGuard } from './auth/guards/at.guard';
+
 
 @Module({
   imports: [
@@ -28,6 +31,12 @@ import { ConfigModule } from '@nestjs/config';
 
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard, // 👈 Pasang AtGuard sebagai Guard Global seluruh aplikasi
+    },
+  ],
 })
 export class AppModule {}

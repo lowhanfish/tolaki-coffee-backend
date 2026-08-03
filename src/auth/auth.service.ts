@@ -83,13 +83,45 @@ export class AuthService {
     }
 
   }
-  authRefreshToken(){
 
+
+  async authRefreshToken(userId: string, refreshToken: string) {
+    // 1. Find the user by ID
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    // 2. If user not found or no hashed RT, throw UnauthorizedException
+    if (!user || !user.hashedRT) {
+      // If user not found or no hashed RT, it means the refresh token is invalid or revoked.
+      throw new UnauthorizedException('Access Denied: Invalid or revoked refresh token');
+    }
+
+    // 3. Compare the provided refresh token with the stored hashed refresh token
+    const rtMatches = await bcrypt.compare(refreshToken, user.hashedRT);
+    if (!rtMatches) {
+      // If refresh token doesn't match, it could be a token reuse attempt or invalid token.
+      // Invalidate all tokens for this user for security by setting hashedRT to null.
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { hashedRT: null } // Invalidate the stored RT
+      });
+      throw new ForbiddenException('Refresh Token Invalid or Used'); // Use Forbidden for potential token reuse
+    }
+
+    // 4. Generate new access and refresh tokens
+    const newTokens = await this.generateToken(user);
+
+    // 5. Hash the new refresh token and update in DB
+    const newHashedRT = await bcrypt.hash(newTokens.rt, 10);
+    await this.updateRT(user.id, newHashedRT);
+
+    return {
+      at: newTokens.at,
+      rt: newTokens.rt
+    };
   }
 
-  authGetProfile(){
-
-  }
   
   findOne(email : string){
     return `Hy saya dari services, username saya adalah ${email}`
@@ -119,6 +151,19 @@ export class AuthService {
       where : {id:id},
       data : {hashedRT : hashedRT}
     })
+  }
+
+  async authGetProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    // Exclude sensitive information like password and hashedRT
+    const { password, hashedRT, ...profile } = user;
+    return profile;
   }
 
 }
