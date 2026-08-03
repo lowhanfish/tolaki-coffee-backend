@@ -34,3 +34,29 @@ model User {
 
   @@map("users")
 }
+
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  price       Decimal  @db.Decimal(10, 2)
+  unit_price  String
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("products")
+}
+
+model File {
+  id        String   @id @default(uuid())
+  title     String
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Generic relation fields
+  table_name String // e.g., "Product", "User", "Category"
+  table_id   String // ID of the related record in table_name
+
+  @@map("files")
+}
