@@ -1,26 +1,52 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ContactService {
+  constructor(private prisma: PrismaService) {}
+
   create(createContactDto: CreateContactDto) {
-    return 'This action adds a new contact';
+    return this.prisma.contact.create({
+      data: createContactDto,
+    });
   }
 
   findAll() {
-    return `This action returns all contact`;
+    return this.prisma.contact.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} contact`;
+  async findOne(id: string) {
+    const contact = await this.prisma.contact.findUnique({ where: { id } });
+    if (!contact) {
+      throw new NotFoundException(`Kontak dengan ID "${id}" tidak ditemukan.`);
+    }
+    return contact;
   }
 
-  update(id: number, updateContactDto: UpdateContactDto) {
-    return `This action updates a #${id} contact`;
+  async findMain() {
+    const contact = await this.prisma.contact.findFirst();
+    if (!contact) {
+      throw new NotFoundException(
+        'Profil kontak utama belum dibuat.',
+      );
+    }
+    return contact;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contact`;
+  update(id: string, updateContactDto: UpdateContactDto) {
+    return this.prisma.contact.update({
+      where: { id },
+      data: updateContactDto,
+    });
+  }
+
+  async remove(id: string) {
+    // Pastikan data ada sebelum dihapus
+    await this.findOne(id);
+    return this.prisma.contact.delete({
+      where: { id },
+    });
   }
 }

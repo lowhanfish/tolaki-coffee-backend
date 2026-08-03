@@ -73,3 +73,22 @@ model News {
 
   @@map("news")
 }
+
+model Contact {
+  id        String   @id @default(uuid())
+  storeName String
+  address   String   @db.Text
+  phone     String
+  email     String?
+  mapsUrl   String?  @db.Text
+  openHours String?
+  instagram String?
+  facebook  String?
+  tiktok    String?
+  tokopedia String?
+  shopee    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contacts")
+}
