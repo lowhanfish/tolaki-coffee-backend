@@ -60,3 +60,16 @@ model File {
 
   @@map("files")
 }
+
+model News {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  news        String   @db.Text
+  file        String?
+  source      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("news")
+}

@@ -1,16 +1,19 @@
-import {IsString, IsNotEmpty, IsNumber, IsDate} from "class-validator"
+import { IsString, IsNotEmpty, IsOptional, IsUrl } from 'class-validator';
 
 export class CreateNewsDto {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
 
-    @IsNotEmpty()
-    @IsString()
-    title : string;
+  @IsString()
+  @IsNotEmpty()
+  description: string;
 
-    @IsNotEmpty()
-    @IsString()
-    desc : string;
+  @IsString()
+  @IsNotEmpty()
+  news: string;
 
-    @IsString()
-    value : string;
-
+  @IsOptional()
+  @IsString()
+  source?: string;
 }
