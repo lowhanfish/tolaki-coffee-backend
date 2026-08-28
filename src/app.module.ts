@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ContactModule } from './contact/contact.module';
 import { NewsModule } from './news/news.module';
@@ -13,7 +12,7 @@ import { ProfileModule } from './profile/profile.module';
 import { ConfigModule } from '@nestjs/config';
 
 import {APP_GUARD} from '@nestjs/core'
-import { AtGuard } from './auth/guards/at.guard';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -21,7 +20,7 @@ import { AtGuard } from './auth/guards/at.guard';
     ConfigModule.forRoot({
       isGlobal: true, // 👈 1. Tambahkan ini di imports agar env terbaca di seluruh modul
     }),
-    AuthModule, 
+    AuthModule,
     PrismaModule, 
     ContactModule, 
     NewsModule, 
@@ -32,11 +31,7 @@ import { AtGuard } from './auth/guards/at.guard';
   ],
   controllers: [AppController],
   providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: AtGuard, // 👈 Pasang AtGuard sebagai Guard Global seluruh aplikasi
-    },
+    AppService
   ],
 })
 export class AppModule {}
