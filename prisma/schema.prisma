@@ -23,17 +23,31 @@ enum AuthProvider {
 model User {
   id         String       @id @default(uuid())
   email      String       @unique
-  username   String       @unique
   name       String?
-  password   String?
-  hashedRT   String?
+  password   String? // Nullable because Google users may not have a local password.
+  hashedRt   String?
   provider   AuthProvider @default(LOCAL)
   providerId String?
+  profile    Profile?
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 
-  @@unique([provider, providerId], name: "provider_providerId")
+  @@unique([provider, providerId], name: "users_provider_providerId_key")
   @@map("users")
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  bio       String?  @db.Text
+  phone     String?
+  avatarUrl String?
+  address   String?  @db.Text
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profiles")
 }
 
 model Product {

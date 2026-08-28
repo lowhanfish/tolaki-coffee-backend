@@ -20,8 +20,8 @@ import { AuthModule } from './auth/auth.module';
     ConfigModule.forRoot({
       isGlobal: true, // 👈 1. Tambahkan ini di imports agar env terbaca di seluruh modul
     }),
-    AuthModule,
     PrismaModule, 
+    AuthModule,
     ContactModule, 
     NewsModule, 
     PartnerModule, 

@@ -4,25 +4,28 @@ import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
 
 
-
-
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
-  login(@Body() body: LoginDTO) {
+  @Post('register')
+  register(@Body() dto:RegisterDTO){
     return {
-      email : body.email,
-      password : body.password
+      email : dto.email,
+      password : dto.password
     }
   }
 
-  @Post('register')
-  register(@Body() body:RegisterDTO){
+  @Post('login')
+  login(@Body() dto: LoginDTO) {
+    return this.authService.login(dto)
+  }
+
+  @Post('google')
+  google(@Body() dto){
     return {
-      email : body.email,
-      password : body.password
+      message : 'Login From Google',
+      status : 200
     }
   }
 
