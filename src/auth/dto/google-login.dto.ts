@@ -1,6 +1,6 @@
 import {IsString, IsNotEmpty, IsOptional} from 'class-validator'
 
-export class GoogleLoginDto {
+export class GoogleLoginDTO {
     @IsString()
     @IsNotEmpty({ message: 'Credential / ID Token dari Google wajib diisi' })
     credential : string;
