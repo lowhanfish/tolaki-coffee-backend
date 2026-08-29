@@ -4,6 +4,9 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { AtStrategy } from './strategies/at.strategy';
 import { AtAuthGuard } from './guards/at.guard';
+import { RtAuthGuard } from './guards/rt.guard';
+import { RtAuthStrategy } from './strategies/rt.strategy';
+
 
 
 @Module({
@@ -16,6 +19,8 @@ import { AtAuthGuard } from './guards/at.guard';
     AuthService,
     AtStrategy,
     AtAuthGuard,
+    RtAuthGuard,
+    RtAuthStrategy
   ],
 })
 export class AuthModule {}

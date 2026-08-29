@@ -6,7 +6,7 @@ import {REFRESH_TOKEN_COOKIE} from '../constants/auth.constant'
 import { Request } from 'express';
 
 @Injectable()
-export class RtStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
+export class RtAuthStrategy extends PassportStrategy(Strategy, 'jwt-rt') {
   constructor() {
     const secret = process.env.JWT_REFRESH_SECRET
     if(!secret) throw new Error('JWT_REFRESH_SECRET is not configured')
