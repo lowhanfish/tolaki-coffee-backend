@@ -9,3 +9,8 @@ export type AccessTokenPayload = {
     email : string;
     type : 'access'
 }
+export type RefreshTokenPayload = {
+    sub : string;
+    email : string;
+    type : 'refresh'
+}

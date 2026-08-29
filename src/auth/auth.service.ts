@@ -14,7 +14,6 @@ import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
 
-
 @Injectable()
 export class AuthService {
   private googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -64,7 +63,6 @@ export class AuthService {
       tokens: { at, rt },
     };
   }
-
 
   async login(dto : LoginDTO){
     

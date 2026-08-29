@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
-
+import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +14,7 @@ export class AuthController {
     return this.authService.register(dto)
   }
 
+  @Public()
   @Post('login')
   login(@Body() dto: LoginDTO) {
     return this.authService.login(dto)
@@ -26,6 +27,5 @@ export class AuthController {
       status : 200
     }
   }
-
 
 }
