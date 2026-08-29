@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
@@ -11,6 +12,8 @@ import * as bcrypt from 'bcrypt';
 import { TokenType } from './interfaces/auth.interfaces';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
+
 
 @Injectable()
 export class AuthService {
@@ -22,26 +25,19 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDTO) {
-    // 1. Normalisasi email
     const email = dto.email.trim().toLowerCase();
 
-    // 2. Validasi konfirmasi password
     if (dto.password !== dto.passwordConfirmation) {
       throw new BadRequestException('passwordConfirmation must match password');
     }
 
-    // 3. Cek keberadaan user
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
+    const existingUser = await this.prisma.user.findUnique({where: { email }});
+
     if (existingUser) {
       throw new ConflictException('email already registered');
     }
 
-    // 4. Hash password utama
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-
-    // 5. Simpan user ke database
     const user = await this.prisma.user.create({
       data: {
         email,
@@ -51,17 +47,14 @@ export class AuthService {
       },
     });
 
-    // 6. Generate token pair
     const { at, rt } = await this.generateTokens(user.id, user.email);
 
-    // 7. Hash & simpan Refresh Token ke DB (opsional tapi sangat disarankan untuk keamanan)
-    const hashRT = await bcrypt.hash(rt, 10);
+    const newHashedRT = await bcrypt.hash(rt, 10);
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { hashedRt: hashRT },
+      data: { hashedRt: newHashedRT },
     });
 
-    // 8. Return token pair (opsional: sertakan data user non-sensitif jika dibutuhkan client)
     return {
       user: {
         id: user.id,
@@ -70,6 +63,55 @@ export class AuthService {
       },
       tokens: { at, rt },
     };
+  }
+
+
+  async login(dto : LoginDTO){
+    
+    // 1. Normalisasi email
+    const email = dto.email.trim().toLowerCase();
+
+    // 2. Check existing email
+    const user = await this.prisma.user.findUnique({
+      where : {email}
+    }) 
+ 
+    // 3. Jika email tidak ada maka kembalikan error UnauthorizedException
+    if(!user || !user.password){
+      throw new UnauthorizedException("Wrong username or password")
+    }
+
+    // 4. Compare password dengan bcrypt
+    const comparePassword = await bcrypt.compare(dto.password, user.password)
+
+    if(!comparePassword){
+      throw new UnauthorizedException("Wrong username or password")
+    }
+
+    // 5. Generate at dan rt baru
+    const {at, rt} = await this.generateTokens(user.id, email)
+    
+    // 6. Hash rt baru
+    const newHashedRT = await bcrypt.hash(rt,10)
+
+    // 7. Update data user
+    await this.prisma.user.update({
+      where : {id:user.id},
+      data : {
+        hashedRt : newHashedRT
+      }
+    })
+
+    return {at, rt}
+
+  }
+
+
+  async googleLogin(dto: GoogleLoginDto){
+    return {
+      message : "endpoint google login active",
+      status : 200
+    }
   }
 
   // --- HELPER METHODS ---
