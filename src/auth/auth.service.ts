@@ -1,100 +1,91 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
-import {JwtService} from '@nestjs/jwt'
-import {OAuth2Client} from 'google-auth-library'
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthProvider } from 'generated/prisma/enums';
-import * as bcrypt from 'bcrypt'
-import {TokenType} from './interfaces/auth.interfaces'
-
-
-
-
-
+import * as bcrypt from 'bcrypt';
+import { TokenType } from './interfaces/auth.interfaces';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
 
-
 @Injectable()
 export class AuthService {
-
-  private googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+  private googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
   constructor(
-    private jwtservice : JwtService,
-    private prisma : PrismaService
-  ){}
- 
-  async login(dto : LoginDTO){
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-    return dto
+  async register(dto: RegisterDTO) {
+    // 1. Normalisasi email
+    const email = dto.email.trim().toLowerCase();
 
-  }
-
-  async register(dto : RegisterDTO){
-
-    // 1. Normalisasi email agar User@Example.com dan user@example.com
-    // tidak dianggap sebagai dua akun berbeda.
-    const email = dto.email.trim().toLowerCase()
-
-    // 2. Pastikan password confirmation sama dengan password utama.
-    // Perbandingan ini dilakukan di service karena kedua nilai berasal dari request
-    // dan @Equals() class-validator membandingkan dengan nilai literal, bukan field lain.
-    if(dto.password !== dto.passwordConfirmation){
-      throw new BadRequestException("passwordConfirmation must match password")
+    // 2. Validasi konfirmasi password
+    if (dto.password !== dto.passwordConfirmation) {
+      throw new BadRequestException('passwordConfirmation must match password');
     }
 
-    // 3. Cek apakah email sudah terdaftar sebelum membuat record baru.
-    const existingUser = await this.prisma.user.findUnique({where : {email : email}})
-    if (existingUser){
-      throw new ConflictException("email already registered")
+    // 3. Cek keberadaan user
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (existingUser) {
+      throw new ConflictException('email already registered');
     }
 
-    // 4. Jangan pernah menyimpan password plaintext.
-    // Angka 10 adalah bcrypt salt rounds yang digunakan untuk membuat hash.
-    const hashedPassword = await bcrypt.hash(dto.password, 10)
+    // 4. Hash password utama
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    // 5. Buat user manual di database menggunakan email, name, dan password hash.
-    const user  = await this.prisma.user.create({
-      data : {
-        email : email,
-        name : dto.name?.trim() || null,
-        password : hashedPassword,
-        provider : AuthProvider.LOCAL
+    // 5. Simpan user ke database
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        name: dto.name?.trim() || null,
+        password: hashedPassword,
+        provider: AuthProvider.LOCAL,
       },
-    })
+    });
 
-    // 6. Setelah registrasi berhasil, langsung login-kan user dengan cookie JWT.
-    
+    // 6. Generate token pair
+    const { at, rt } = await this.generateTokens(user.id, user.email);
 
+    // 7. Hash & simpan Refresh Token ke DB (opsional tapi sangat disarankan untuk keamanan)
+    const hashRT = await bcrypt.hash(rt, 10);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { hashedRt: hashRT },
+    });
 
-  }
-
-  async refreshToken(userId: string, refreshToken:string){
-
-  }
-
-  async logout(userId : string){
-
-  }
-
-  async authenticateGoogleUser(idToken:string){
-
-  }
-
-  
-
-  async getToken(dto:RegisterDTO):Promise<TokenType>{
-    const [at, rt] = await Promise.all([
-      "contoh",
-      "contoh"
-    ])
-
+    // 8. Return token pair (opsional: sertakan data user non-sensitif jika dibutuhkan client)
     return {
-      at:at, 
-      rt:rt
-    }
-
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      tokens: { at, rt },
+    };
   }
 
+  // --- HELPER METHODS ---
 
+  private async generateTokens(id: string, email: string): Promise<TokenType> {
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(
+        { sub: id, email, type: 'access' },
+        { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '15m' },
+      ),
+      this.jwtService.signAsync(
+        { sub: id, email, type: 'refresh' },
+        { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
+      ),
+    ]);
+
+    return { at, rt };
+  }
 }

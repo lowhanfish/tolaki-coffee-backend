@@ -10,15 +10,15 @@ export class AuthController {
 
   @Post('register')
   register(@Body() dto:RegisterDTO){
-    return {
-      email : dto.email,
-      password : dto.password
-    }
+    return this.authService.register(dto)
   }
 
   @Post('login')
   login(@Body() dto: LoginDTO) {
-    return this.authService.login(dto)
+    return {
+      message : 'Login Manualy',
+      status : 200
+    }
   }
 
   @Post('google')
