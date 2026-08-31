@@ -8,6 +8,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser()); // Gunakan middleware cookie-parser
+
+  app.enableCors({
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"], // Domin yang diizinkan (Next.js)
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    credentials: true,
+  });
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist :true,
     forbidNonWhitelisted : true,
