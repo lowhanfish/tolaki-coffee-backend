@@ -1,1 +1,5 @@
-export class CreateProfileDto {}
+import {IsString, IsNumber} from 'class-validator'
+
+export class CreateProfileDto {
+    
+}

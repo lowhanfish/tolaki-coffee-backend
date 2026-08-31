@@ -50,6 +50,19 @@ model Profile {
   @@map("profiles")
 }
 
+model CompanyProfile {
+  id          String   @id @default(uuid())
+  brand       String
+  quotes      String
+  description String
+  detail      String
+  file        String?
+  createdAt   DateTime @default(now())
+  updateAt    DateTime @updatedAt
+
+  @@map("companyprofile")
+}
+
 model Product {
   id          String   @id @default(uuid())
   title       String

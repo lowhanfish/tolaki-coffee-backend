@@ -15,7 +15,6 @@ const createCustomStorage = (destinationPath = './uploads') => {
     })
 }
 
-
 export const UploadSingle = (fieldName = 'file', destination = './uploads') => {
     return applyDecorators(
         UseInterceptors(

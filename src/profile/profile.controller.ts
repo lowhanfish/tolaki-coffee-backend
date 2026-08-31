@@ -1,15 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UploadSingle, UploadMultiple } from 'src/common/decorators/upload-file.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
+
+
+
 
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @Post()
-  create(@Body() createProfileDto: CreateProfileDto) {
-    return this.profileService.create(createProfileDto);
+  @Public()
+  @UploadSingle()
+  create(@UploadedFile() file: Express.Multer.File, @Body() createProfileDto: CreateProfileDto) {
+    return this.profileService.create(createProfileDto, file);
   }
 
   @Get()
