@@ -4,7 +4,6 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { NewsModule } from './news/news.module';
 import { PartnerModule } from './partner/partner.module';
-import { ProductModule } from './product/product.module';
 import { ProfileModule } from './profile/profile.module';
 
 import { ConfigModule } from '@nestjs/config';
@@ -23,7 +22,6 @@ import { ContactModule } from './contact/contact.module';
     AuthModule,
     NewsModule, 
     PartnerModule, 
-    ProductModule, 
     ProfileModule, ContactModule
 
   ],

@@ -4,6 +4,9 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UploadSingle, UploadMultiple } from 'src/common/decorators/upload-file.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { createProfile } from './swagger/profile.swagger';
+
 
 
 
@@ -12,9 +15,11 @@ import { Public } from 'src/common/decorators/public.decorator';
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @Post()
+  @Post('create')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({schema : createProfile})
   @Public()
-  @UploadSingle()
+  @UploadSingle('file', './uploads/aaa')
   create(@UploadedFile() file: Express.Multer.File, @Body() createProfileDto: CreateProfileDto) {
     return this.profileService.create(createProfileDto, file);
   }
