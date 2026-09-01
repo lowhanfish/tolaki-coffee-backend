@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import {APP_GUARD} from '@nestjs/core'
 import { AtAuthGuard } from './auth/guards/at.guard';
 import { ContactModule } from './contact/contact.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { ContactModule } from './contact/contact.module';
     AuthModule,
     NewsModule, 
     PartnerModule, 
-    ProfileModule, ContactModule
+    ProfileModule, ContactModule, ProductModule
 
   ],
   controllers: [AppController],
