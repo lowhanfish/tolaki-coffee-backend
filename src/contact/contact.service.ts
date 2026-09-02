@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContactDto, UpdateContactDto } from './dto/contact.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -27,48 +27,80 @@ export class ContactService {
   ){}
 
 
-  create(dto:CreateContactDto) {
-    const query = this.prisma.contact.create({
-      data : {
-        storeName : dto.storeName,
-        address : dto.address,
-        phone : dto.phone,
-        email : dto.email,
-        mapsUrl : dto.mapsUrl,
-        openHours : dto.openHours,
-        instagram : dto.instagram,
-        facebook : dto.facebook,
-        tiktok : dto.tiktok,
-        tokopedia : dto.tokopedia,
-        shopee : dto.shopee,
-      }
+  async create(dto:CreateContactDto) {
+    const query = await this.prisma.contact.create({
+      data : dto
     })
-
-    console.log(query)
-
     return query
-
-
   }
 
-  findAll() {
+  async findAll(query) {
+
+    const skip = Number(query?.skip?? 0)
+    const limit = Number(query?.limit?? 100)
+
+    const searchCondititon = query.search ?
+    {
+      OR : [
+        {storeName : {contains : query.search, mode : 'insensitive' as const}},
+      ]
+    } :{}
+
+    const [data, total] = await Promise.all([
+      this.prisma.contact.findMany({
+        where : searchCondititon,
+        skip : skip,
+        take : limit,
+        orderBy : {
+          createdAt : 'desc'
+        }
+      })
+      ,
+      this.prisma.contact.count({
+        where : searchCondititon,
+      })
+    ])
+
     return {
-      total : 100,
-      skip : 1,
-      limit : 8,
-      data : [response]
+      total : total,
+      skip : skip,
+      limit : limit,
+      data : data
     };
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     return response;
   }
 
-  update(id: string, updateContactDto:UpdateContactDto) {
-    return response;
+  async update(id: string, dto:UpdateContactDto) {
+    try {
+      const query = await this.prisma.contact.update({
+        where : {id},
+        data : dto
+      })
+      return query
+    } catch (error:any) {
+      if(error?.code == 'P2025'){
+        throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`)
+      }
+      throw error
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contact`;
+  async delete(id: string) {
+
+    try {
+      await this.prisma.contact.delete({
+        where : {id},
+      })
+      return { message: `Data dengan id : ${id} berhasil dihapus..!` };
+    } catch (error:any) {
+      if(error?.code == 'P2025') throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`)
+        throw error
+    }
   }
+
+
+
 }

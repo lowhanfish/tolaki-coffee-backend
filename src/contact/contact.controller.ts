@@ -19,7 +19,7 @@ export class ContactController {
   @Get('read')
   @Public()
   async findAll(@Query() query:ReadAllContactDto):Promise<ResponseContactDto> {
-    return this.contactService.findAll();
+    return this.contactService.findAll(query);
   }
 
   @Patch('update/:id')
@@ -31,7 +31,7 @@ export class ContactController {
   @Delete('delete/:id')
   @Public()
   async remove(@Param('id') id: string) {
-    return this.contactService.remove(+id);
+    return this.contactService.delete(id);
   }
 
   @Get('readOne/:id')
