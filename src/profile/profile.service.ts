@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProfileDto } from './dto/create-profile.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { CreateProfileDto } from './dto/profile.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 
@@ -12,12 +11,16 @@ export class ProfileService {
   ){}
 
 
-  create(createProfileDto: CreateProfileDto, file: Express.Multer.File) {
-    return {
-      file : file,
-      data : createProfileDto
-    };
-  }
+async create(createProfileDto: CreateProfileDto) {
+  // const profile = await this.prisma.profile.create({
+  //   data: createProfileDto,
+  // });
+
+  // // Wajib ada return ini agar Interceptor bisa membaca profile.id
+  // return profile;
+
+  return createProfileDto
+}
 
   findAll() {
     return `This action returns all profile`;
@@ -27,7 +30,7 @@ export class ProfileService {
     return `This action returns a #${id} profile`;
   }
 
-  update(id: number, updateProfileDto: UpdateProfileDto) {
+  update(id: number, updateProfileDto: CreateProfileDto) {
     return `This action updates a #${id} profile`;
   }
 

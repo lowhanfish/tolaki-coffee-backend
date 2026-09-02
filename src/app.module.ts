@@ -13,6 +13,7 @@ import {APP_GUARD} from '@nestjs/core'
 import { AtAuthGuard } from './auth/guards/at.guard';
 import { ContactModule } from './contact/contact.module';
 import { ProductModule } from './product/product.module';
+import { TestEndpointModule } from './test-endpoint/test-endpoint.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { ProductModule } from './product/product.module';
     AuthModule,
     NewsModule, 
     PartnerModule, 
-    ProfileModule, ContactModule, ProductModule
+    ProfileModule, ContactModule, ProductModule, TestEndpointModule
 
   ],
   controllers: [AppController],
