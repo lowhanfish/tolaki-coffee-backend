@@ -1,34 +1,43 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ContactService } from './contact.service';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
+import { CreateContactDto, UpdateContactDto, ReadAllContactDto, ResponseContactDto, ResponseContactOnceDto } from './dto/contact.dto';
+import { ApiCreatedResponse } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
+
+
 
 @Controller('contact')
 export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
-  @Post()
-  create(@Body() createContactDto: CreateContactDto) {
+  @Post('create')
+  @Public()
+  async create(@Body() createContactDto: CreateContactDto): Promise<ResponseContactOnceDto> {
     return this.contactService.create(createContactDto);
   }
 
-  @Get()
-  findAll() {
+  @Get('read')
+  @Public()
+  async findAll(@Query() query:ReadAllContactDto):Promise<ResponseContactDto> {
     return this.contactService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Patch('update/:id')
+  @Public()
+  async update(@Param('id') id: string, @Body() updateContactDto:UpdateContactDto): Promise<ResponseContactOnceDto> {
+    return this.contactService.update(id, updateContactDto);
+  }
+
+  @Delete('delete/:id')
+  @Public()
+  async remove(@Param('id') id: string) {
+    return this.contactService.remove(+id);
+  }
+
+  @Get('readOne/:id')
+  @Public()
+  async findOne(@Param('id') id: string):Promise<ResponseContactOnceDto> {
     return this.contactService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto) {
-    return this.contactService.update(+id, updateContactDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.contactService.remove(+id);
-  }
 }

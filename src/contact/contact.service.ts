@@ -1,23 +1,71 @@
 import { Injectable } from '@nestjs/common';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
+import { CreateContactDto, UpdateContactDto } from './dto/contact.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+
+const response = {
+    id : "",
+    storeName : "",
+    address : "",
+    phone : "",
+    email : "",
+    mapsUrl : "",
+    openHours : "",
+    instagram : "",
+    facebook : "",
+    tiktok : "",
+    tokopedia : "",
+    shopee : "",
+}
+
 
 @Injectable()
 export class ContactService {
-  create(createContactDto: CreateContactDto) {
-    return 'This action adds a new contact';
+
+  constructor(
+    private prisma : PrismaService
+  ){}
+
+
+  create(dto:CreateContactDto) {
+    const query = this.prisma.contact.create({
+      data : {
+        storeName : dto.storeName,
+        address : dto.address,
+        phone : dto.phone,
+        email : dto.email,
+        mapsUrl : dto.mapsUrl,
+        openHours : dto.openHours,
+        instagram : dto.instagram,
+        facebook : dto.facebook,
+        tiktok : dto.tiktok,
+        tokopedia : dto.tokopedia,
+        shopee : dto.shopee,
+      }
+    })
+
+    console.log(query)
+
+    return query
+
+
   }
 
   findAll() {
-    return `This action returns all contact`;
+    return {
+      total : 100,
+      skip : 1,
+      limit : 8,
+      data : [response]
+    };
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} contact`;
+    return response;
   }
 
-  update(id: number, updateContactDto: UpdateContactDto) {
-    return `This action updates a #${id} contact`;
+  update(id: string, updateContactDto:UpdateContactDto) {
+    return response;
   }
 
   remove(id: number) {

@@ -13,11 +13,7 @@ export class CountA implements NestInterceptor{
         if (a === 0) {
             throw new Error("Not 0")
         }
-
-        const divition = a/b
-        request.divition = divition
-
-
+        body.result = a/b
         return next.handle()
     }
 
