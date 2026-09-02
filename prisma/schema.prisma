@@ -21,16 +21,21 @@ enum AuthProvider {
 }
 
 model User {
-  id         String       @id @default(uuid())
-  email      String       @unique
-  name       String?
-  password   String? // Nullable because Google users may not have a local password.
-  hashedRt   String?
-  provider   AuthProvider @default(LOCAL)
-  providerId String?
-  profile    Profile?
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String?
+  password        String? // Nullable because Google users may not have a local password.
+  hashedRt        String?
+  provider        AuthProvider     @default(LOCAL)
+  providerId      String?
+  profile         Profile?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  products        Product[]
+  files           File[]
+  news            News[]
+  contacts        Contact[]
+  companyProfiles CompanyProfile[]
 
   @@unique([provider, providerId], name: "users_provider_providerId_key")
   @@map("users")
@@ -43,9 +48,10 @@ model Profile {
   phone     String?
   avatarUrl String?
   address   String?  @db.Text
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("profiles")
 }
@@ -59,18 +65,28 @@ model CompanyProfile {
   file        String?
   createdAt   DateTime @default(now())
   updateAt    DateTime @updatedAt
+  createdBy   String
+
+  user     User      @relation(fields: [createdBy], references: [id])
+  products Product[]
+  contacts Contact[]
 
   @@map("companyprofile")
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  title       String
-  price       Decimal  @db.Decimal(10, 2)
-  unit_price  String
-  description String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(uuid())
+  title            String
+  price            Decimal  @db.Decimal(10, 2)
+  unit_price       String
+  description      String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String
+  companyProfileId String
+
+  user           User           @relation(fields: [createdBy], references: [id])
+  companyprofile CompanyProfile @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
 
   @@map("products")
 }
@@ -86,6 +102,9 @@ model File {
   // Generic relation fields
   table_name String // e.g., "Product", "User", "Category"
   table_id   String // ID of the related record in table_name
+  createdBy  String
+
+  user User @relation(fields: [createdBy], references: [id])
 
   @@map("files")
 }
@@ -99,25 +118,33 @@ model News {
   source      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  createdBy   String
+
+  user User @relation(fields: [createdBy], references: [id])
 
   @@map("news")
 }
 
 model Contact {
-  id        String   @id @default(uuid())
-  storeName String
-  address   String   @db.Text
-  phone     String
-  email     String?
-  mapsUrl   String?  @db.Text
-  openHours String?
-  instagram String?
-  facebook  String?
-  tiktok    String?
-  tokopedia String?
-  shopee    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(uuid())
+  storeName        String
+  address          String   @db.Text
+  phone            String
+  email            String?
+  mapsUrl          String?  @db.Text
+  openHours        String?
+  instagram        String?
+  facebook         String?
+  tiktok           String?
+  tokopedia        String?
+  shopee           String?
+  companyProfileId String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String
+
+  user           User           @relation(fields: [createdBy], references: [id])
+  companyprofile CompanyProfile @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
 
   @@map("contacts")
 }
