@@ -11,7 +11,6 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Post('create')
-  @Public()
   async create(@Body() createContactDto: CreateContactDto): Promise<ResponseContactOnceDto> {
     return this.contactService.create(createContactDto);
   }
@@ -23,13 +22,11 @@ export class ContactController {
   }
 
   @Patch('update/:id')
-  @Public()
   async update(@Param('id') id: string, @Body() updateContactDto:UpdateContactDto): Promise<ResponseContactOnceDto> {
     return this.contactService.update(id, updateContactDto);
   }
 
   @Delete('delete/:id')
-  @Public()
   async remove(@Param('id') id: string) {
     return this.contactService.delete(id);
   }
@@ -37,7 +34,7 @@ export class ContactController {
   @Get('readOne/:id')
   @Public()
   async findOne(@Param('id') id: string):Promise<ResponseContactOnceDto> {
-    return this.contactService.findOne(+id);
+    return this.contactService.findOne(id);
   }
 
 }

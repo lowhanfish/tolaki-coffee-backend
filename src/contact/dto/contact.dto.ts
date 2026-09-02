@@ -69,7 +69,6 @@ export class ResponseContactOnceDto {
     storeName :string;
     address :string;
     phone :string;
-
     email? :string | null;
     mapsUrl? :string | null;
     openHours? :string | null;

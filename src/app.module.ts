@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
-import { NewsModule } from './news/news.module';
 import { PartnerModule } from './partner/partner.module';
 import { ProfileModule } from './profile/profile.module';
 
@@ -14,6 +13,7 @@ import { AtAuthGuard } from './auth/guards/at.guard';
 import { ContactModule } from './contact/contact.module';
 import { ProductModule } from './product/product.module';
 import { TestEndpointModule } from './test-endpoint/test-endpoint.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -22,9 +22,8 @@ import { TestEndpointModule } from './test-endpoint/test-endpoint.module';
     }),
     PrismaModule, 
     AuthModule,
-    NewsModule, 
     PartnerModule, 
-    ProfileModule, ContactModule, ProductModule, TestEndpointModule
+    ProfileModule, ContactModule, ProductModule, TestEndpointModule, NewsModule
 
   ],
   controllers: [AppController],

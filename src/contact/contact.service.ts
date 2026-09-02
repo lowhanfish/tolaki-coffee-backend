@@ -69,8 +69,14 @@ export class ContactService {
     };
   }
 
-  async findOne(id: number) {
-    return response;
+  async findOne(id: string) {
+    const query = await this.prisma.contact.findUnique({
+      where : {id}
+    });
+    if (!query) {
+      throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`);
+    }
+    return query
   }
 
   async update(id: string, dto:UpdateContactDto) {
