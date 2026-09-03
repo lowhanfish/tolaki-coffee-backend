@@ -26,9 +26,10 @@ import { CompanyProfileModule } from './company-profile/company-profile.module';
     NewsModule, 
     PartnerModule, 
     ProfileModule, 
+    CompanyProfileModule,
     ContactModule, 
     ProductModule, 
-    TestEndpointModule, CompanyProfileModule
+    TestEndpointModule
 
   ],
   controllers: [AppController],
