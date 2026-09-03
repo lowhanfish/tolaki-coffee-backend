@@ -1,5 +1,5 @@
 import { PartialType, ApiProperty } from '@nestjs/swagger';
-import {IsString, IsNumber, IsNotEmpty, IsOptional} from 'class-validator'
+import {Allow ,IsString, IsNumber, IsNotEmpty, IsOptional} from 'class-validator'
 
 
 
@@ -10,8 +10,8 @@ export class CreateNewsDto{
     title : string;
     
     @IsString()
-    @IsOptional()
-    description? : string;
+    @IsNotEmpty()
+    description : string;
     
     @IsString()
     @IsNotEmpty()
@@ -20,6 +20,15 @@ export class CreateNewsDto{
     @IsString()
     @IsOptional()
     source? : string;
+    
+    @ApiProperty({
+        type: 'string',
+        format: 'binary',
+        required: false,
+    })
+    @Allow()
+    file?: any;
+
 }
 
 export class ReadNewsDto{

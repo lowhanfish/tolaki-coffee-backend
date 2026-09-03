@@ -27,9 +27,12 @@ export class ContactService {
   ){}
 
 
-  async create(dto:CreateContactDto) {
+  async create(dto: CreateContactDto, userId: string) {
     const query = await this.prisma.contact.create({
-      data : dto
+      data: {
+        ...dto,
+        createdBy: userId,
+      },
     })
     return query
   }

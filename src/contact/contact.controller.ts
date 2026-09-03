@@ -3,6 +3,7 @@ import { ContactService } from './contact.service';
 import { CreateContactDto, UpdateContactDto, ReadAllContactDto, ResponseContactDto, ResponseContactOnceDto } from './dto/contact.dto';
 import { ApiCreatedResponse } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
+import { GetCurrentUser } from 'src/auth/decorators/get-current-user.decorator';
 
 
 
@@ -11,8 +12,11 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Post('create')
-  async create(@Body() createContactDto: CreateContactDto): Promise<ResponseContactOnceDto> {
-    return this.contactService.create(createContactDto);
+  async create(
+    @Body() createContactDto: CreateContactDto,
+    @GetCurrentUser('userId') userId: string,
+  ): Promise<ResponseContactOnceDto> {
+    return this.contactService.create(createContactDto, userId);
   }
 
   @Get('read')

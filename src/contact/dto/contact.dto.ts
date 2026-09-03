@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import {IsString, IsDate, IsNumber, IsBoolean, IsEmail, IsOptional, IsNotEmpty} from 'class-validator'
+import { IsString, IsNumber, IsEmail, IsOptional, IsNotEmpty, IsUUID } from 'class-validator'
 
 export class ReadAllContactDto{
     @IsOptional()
@@ -29,8 +29,12 @@ export class CreateContactDto {
     phone :string;
 
     @IsEmail()
-    @IsNotEmpty()
+    @IsOptional()
     email? :string;
+
+    @IsUUID()
+    @IsNotEmpty()
+    companyProfileId: string;
 
     @IsOptional()
     @IsString()

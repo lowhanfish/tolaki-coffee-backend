@@ -22,8 +22,12 @@ import { NewsModule } from './news/news.module';
     }),
     PrismaModule, 
     AuthModule,
+    NewsModule, 
     PartnerModule, 
-    ProfileModule, ContactModule, ProductModule, TestEndpointModule, NewsModule
+    ProfileModule, 
+    ContactModule, 
+    ProductModule, 
+    TestEndpointModule
 
   ],
   controllers: [AppController],

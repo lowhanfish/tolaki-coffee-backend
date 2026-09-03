@@ -5,6 +5,7 @@ import {
   CallHandler,
   mixin,
   Type,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -24,6 +25,11 @@ export function PolymorphicImageInterceptor(tableName: string): Type<NestInterce
           const targetId = createdRecord?.id;
           if (!targetId) return;
 
+          const createdBy = request.user?.userId;
+          if (!createdBy) {
+            throw new UnauthorizedException('User belum terautentikasi');
+          }
+
           // 2. Ambil file dari request (dari Multer)
           const file = request.file as Express.Multer.File;
           const files = request.files as Express.Multer.File[];
@@ -37,6 +43,7 @@ export function PolymorphicImageInterceptor(tableName: string): Type<NestInterce
                 type: file.mimetype,
                 table_name: tableName,
                 table_id: String(targetId),
+                createdBy,
               },
             });
           }
@@ -50,6 +57,7 @@ export function PolymorphicImageInterceptor(tableName: string): Type<NestInterce
                 type: f.mimetype,
                 table_name: tableName,
                 table_id: String(targetId),
+                createdBy,
               })),
             });
           }

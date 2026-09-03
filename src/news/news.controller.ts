@@ -1,8 +1,11 @@
-import { Controller, Post, Get, Patch, Delete, Body, Query, Param } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Query, Param, UploadedFile } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { Public } from 'src/common/decorators/public.decorator';
+import { GetCurrentUser } from 'src/auth/decorators/get-current-user.decorator';
 import { CreateNewsDto, ReadNewsDto, UpdateNewsDto, ResponseOnceNewsDto, ResponseAllNewsDto } from './dto/news.dto';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiConsumes, ApiProperty } from '@nestjs/swagger';
+import { UploadSingle, UploadMultiple } from 'src/common/decorators/upload-file.decorator';
+
 
 
 @Controller('news')
@@ -10,13 +13,17 @@ export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
   @Post('create')
-  @Public()
-  async create(@Body() dto:CreateNewsDto){
-    return this.newsService.create(dto)
+  @ApiConsumes('multipart/form-data')
+  @UploadSingle('file', './uploads/news')
+  async create(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreateNewsDto,
+    @GetCurrentUser('userId') userId: string,
+  ) {
+    return this.newsService.create(file, dto, userId);
   }
   @Get('read')
-  @Public()
-  async read(@Body() query:ReadNewsDto){
+  async read(@Query() query:ReadNewsDto){
     return this.newsService.read(query)
   }
 
@@ -27,9 +34,10 @@ export class NewsController {
   }
 
   @Patch('update/:id')
-  @Public()
-  async update(@Param('id') id:string, @Body() dto:UpdateNewsDto){
-    return this.newsService.update(id, dto)
+  @ApiConsumes('multipart/form-data')
+  @UploadSingle('file', './uploads/news')
+  async update(@Param('id') id:string, @Body() dto:UpdateNewsDto, @UploadedFile() file?:Express.Multer.File){
+    return this.newsService.update(id, dto, file)
   }
 
   @Delete('delete/:id')
