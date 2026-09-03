@@ -7,19 +7,19 @@ export class NewsService {
         private prisma : PrismaService
     ){}
 
-    async read(){
+    async read(query){
 
     }
-    async readOne(){
+    async readOne(id){
 
     }
-    async create(){
+    async create(dto){
         
     }
-    async update(){
+    async update(id, dto){
 
     }
-    async delete(){
+    async delete(id){
 
     }
 }

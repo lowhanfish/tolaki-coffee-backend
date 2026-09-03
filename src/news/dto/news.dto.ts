@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/swagger';
+import { PartialType, ApiProperty } from '@nestjs/swagger';
 import {IsString, IsNumber, IsNotEmpty, IsOptional} from 'class-validator'
 
 
