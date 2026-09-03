@@ -101,6 +101,7 @@ export class NewsService {
             return {message : `Data dengan id : ${id} berhasil dihapus`}
         } catch (error:any) {
             if(error?.code == "P2025") throw new NotFoundException(`Data dengan id : ${id} tidak di temukan`)
+            throw error
         }
     }
 }

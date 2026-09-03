@@ -62,6 +62,9 @@ model CompanyProfile {
   quotes      String
   description String
   detail      String
+  email       String?
+  phone       String?
+  address     String?
   file        String?
   createdAt   DateTime @default(now())
   updateAt    DateTime @updatedAt
