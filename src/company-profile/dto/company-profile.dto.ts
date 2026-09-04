@@ -46,8 +46,9 @@ export class ReadCompanyDto {
     @IsOptional()
     limit? : number;
 
-    @IsNumber()
-    search : string;
+    @IsString()
+    @IsOptional()
+    search? : string;
 }
 
 export class UpdateCompanyDto extends PartialType(CreateCompanyDto) {}

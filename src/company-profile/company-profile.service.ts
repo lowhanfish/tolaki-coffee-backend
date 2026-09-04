@@ -19,15 +19,39 @@ export class CompanyProfileService {
                 createdBy : userId
             }
         })
-
-        if(!data){
-            throw new Error('')
-        }
         return data
     }
 
     async read (query:ReadCompanyDto) {
-        return query
+        const skip = query?.skip ?? 0;
+        const limit = query?.limit ?? 100;
+        const searchCondition = query.search? 
+        {
+            OR : [
+                {brand : {contains :  query.search, mode : 'insensitive' as const}},
+            ]
+        }:{}
+
+        const [data, total] = await Promise.all([
+            await this.prisma.companyProfile.findMany({
+                where : searchCondition,
+                skip : skip,
+                take : limit,
+                orderBy : {
+                    createdAt : 'desc'
+                }
+            }),
+            await this.prisma.companyProfile.count({
+                where : searchCondition
+            })
+        ])
+
+        return {
+            total : total,
+            skip : skip,
+            limit : limit,
+            data : data
+        }
     }
 
     async readOne (id:string) {

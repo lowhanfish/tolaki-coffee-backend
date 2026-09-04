@@ -28,7 +28,7 @@ export class CompanyProfileController {
 
   @Get('read')
   @Public()
-  async read(@Query() query: ReadCompanyDto){
+  async read(@Query() query: ReadCompanyDto):Promise<ResponseAllCompanyDto>{
     return this.companyProfileService.read(query)
   }
 
