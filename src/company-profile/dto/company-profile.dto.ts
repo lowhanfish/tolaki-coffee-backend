@@ -35,9 +35,6 @@ export class CreateCompanyDto {
         required : false
     })
     file? : string;
-
-    @IsString()
-    createdAt : string;
 }
 
 export class ReadCompanyDto {
@@ -54,18 +51,19 @@ export class ReadCompanyDto {
 }
 
 export class UpdateCompanyDto extends PartialType(CreateCompanyDto) {}
+
 export class ResponseOnceCompanyDto {
     id : string;
     brand : string;
     quotes : string;
     description : string;
     detail : string;
-    email? : string;
-    phone? : string;
-    address? : string;
-    file? : string;
-    createdAt : string;
-    updateAt : string;
+    email? : string | null;
+    phone? : string | null;
+    address? : string | null;
+    file? : string | null;
+    createdAt : Date;
+    updateAt : Date;
     createdBy : string;
 }
 export class ResponseAllCompanyDto {

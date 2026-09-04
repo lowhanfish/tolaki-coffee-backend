@@ -11,23 +11,34 @@ export class CompanyProfileService {
         private prisma : PrismaService
     ){}
 
-    create (dto: CreateCompanyDto) {
-        return dto
+    async create (dto: CreateCompanyDto, file:Express.Multer.File, userId:string) {
+        const data = await this.prisma.companyProfile.create({
+            data : {
+                ...dto,
+                file : file?.filename ?? null,
+                createdBy : userId
+            }
+        })
+
+        if(!data){
+            throw new Error('')
+        }
+        return data
     }
 
-    read (query:ReadCompanyDto) {
+    async read (query:ReadCompanyDto) {
         return query
     }
 
-    readOne (id:string) {
+    async readOne (id:string) {
         return id
     }
 
-    update (id:string, dto:UpdateCompanyDto) {
+    async update (id:string, dto:UpdateCompanyDto) {
         return dto
     }
 
-    delete (id:string) {
+    async delete (id:string) {
         return id
     }   
 
