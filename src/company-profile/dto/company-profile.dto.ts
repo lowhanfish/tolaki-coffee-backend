@@ -1,8 +1,6 @@
 import { PartialType, ApiProperty } from '@nestjs/swagger'
 import {Allow, IsString, IsNumber, IsNotEmpty, IsOptional} from 'class-validator'
 
-
-
 export class CreateCompanyDto {
     @IsString()
     brand : string;
@@ -41,6 +39,7 @@ export class CreateCompanyDto {
     @IsString()
     createdAt : string;
 }
+
 export class ReadCompanyDto {
     @IsNumber()
     @IsOptional()
