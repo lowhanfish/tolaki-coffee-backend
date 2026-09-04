@@ -60,14 +60,14 @@ export class CompanyProfileService {
         return id
     }
 
-    async update (id:string, dto:UpdateCompanyDto, file:Express.Multer.File) {
+    async update (id:string, dto:UpdateCompanyDto, file?:Express.Multer.File) {
         const {file : newFile, ...newDto} = dto
         const existingData = await this.prisma.companyProfile.findUnique({
             where : {id}
         })
 
         if(!existingData){
-            await removeSingleFile(file.path)
+            if(file) await removeSingleFile(file.path)
             throw new NotFoundException(`data dengan id : ${id} tidak ditemukan`)
         }
 
@@ -80,6 +80,7 @@ export class CompanyProfileService {
                 }
             })
 
+            console.log("ayo hapus file")
             if(file && existingData.file){
                 await removeSingleFile(`./uploads/company/${existingData.file}`)
             }
@@ -96,7 +97,17 @@ export class CompanyProfileService {
     }
 
     async delete (id:string) {
-        return id
+        try {
+            const deleteData = await this.prisma.companyProfile.delete({
+                where : {id}
+            })
+            if (deleteData.file) removeSingleFile(`./uploads/company/${deleteData.file}`)
+            return `Data dengan id : ${id} berhasil di hapus`
+
+        } catch (error:any) {
+            if(error.code == 'P2025') throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`)
+            throw error
+        }
     }   
 
     

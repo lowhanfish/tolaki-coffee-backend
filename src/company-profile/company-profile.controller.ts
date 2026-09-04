@@ -39,12 +39,18 @@ export class CompanyProfileController {
   }
 
   @Patch('update/:id')
-  async update(id:string, @Body() body:UpdateCompanyDto, @UploadedFiles() file: Express.Multer.File){
+  @ApiConsumes('multipart/form-data')
+  @UploadSingle('file', './uploads/company')
+  async update(
+    @Param('id') id:string, 
+    @Body() body:UpdateCompanyDto, 
+    @UploadedFile() file?: Express.Multer.File
+  ){
     return this.companyProfileService.update(id, body, file)
   }
 
   @Delete('delete/:id')
-  async delete(id:string){
+  async delete(@Param('id') id:string){
     return this.companyProfileService.delete(id)
   }
 
