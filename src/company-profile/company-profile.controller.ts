@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Query, Param, Body, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Query, Param, Body, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { CompanyProfileService } from './company-profile.service';
 import { Public } from 'src/common/decorators/public.decorator';
 import { UploadSingle, UploadMultiple } from 'src/common/decorators/upload-file.decorator';
@@ -39,8 +39,8 @@ export class CompanyProfileController {
   }
 
   @Patch('update/:id')
-  async update(id:string, @Body() body:UpdateCompanyDto){
-    return this.companyProfileService.update(id, body)
+  async update(id:string, @Body() body:UpdateCompanyDto, @UploadedFiles() file: Express.Multer.File){
+    return this.companyProfileService.update(id, body, file)
   }
 
   @Delete('delete/:id')

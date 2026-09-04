@@ -22,6 +22,7 @@ export class NewsController {
   ) {
     return this.newsService.create(file, dto, userId);
   }
+  
   @Get('read')
   async read(@Query() query:ReadNewsDto){
     return this.newsService.read(query)

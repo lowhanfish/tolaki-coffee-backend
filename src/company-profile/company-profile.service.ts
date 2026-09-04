@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCompanyDto, UpdateCompanyDto, ReadCompanyDto } from './dto/company-profile.dto';
+import { Multer } from 'multer';
+import { removeSingleFile } from 'src/common/utils/remove-file';
 
 
 
@@ -58,8 +60,39 @@ export class CompanyProfileService {
         return id
     }
 
-    async update (id:string, dto:UpdateCompanyDto) {
-        return dto
+    async update (id:string, dto:UpdateCompanyDto, file:Express.Multer.File) {
+        const {file : newFile, ...newDto} = dto
+        const existingData = await this.prisma.companyProfile.findUnique({
+            where : {id}
+        })
+
+        if(!existingData){
+            await removeSingleFile(file.path)
+            throw new NotFoundException(`data dengan id : ${id} tidak ditemukan`)
+        }
+
+        try {
+            const data = await this.prisma.companyProfile.update({
+                where : {id},
+                data : {
+                    ...dto,
+                    ...(file? {file : file.filename}: {})
+                }
+            })
+
+            if(file && existingData.file){
+                await removeSingleFile(`./uploads/company/${existingData.file}`)
+            }
+
+            return data
+            
+        } catch (error:any) {
+            if(file) await removeSingleFile(file.path)
+            throw error
+        }
+
+
+
     }
 
     async delete (id:string) {
