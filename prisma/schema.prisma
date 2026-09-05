@@ -21,23 +21,24 @@ enum AuthProvider {
 }
 
 model User {
-  id                String              @id @default(uuid())
-  email             String              @unique
-  name              String?
-  password          String? // Nullable because Google users may not have a local password.
-  hashedRt          String?
-  provider          AuthProvider        @default(LOCAL)
-  providerId        String?
-  profile           Profile?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  products          Product[]
-  files             File[]
-  news              News[]
-  contacts          Contact[]
-  companyProfiles   CompanyProfile[]
-  partners          Partner[]
-  storiesFromGarden StoriesFromGarden[]
+  id                    String                 @id @default(uuid())
+  email                 String                 @unique
+  name                  String?
+  password              String? // Nullable because Google users may not have a local password.
+  hashedRt              String?
+  provider              AuthProvider           @default(LOCAL)
+  providerId            String?
+  profile               Profile?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  products              Product[]
+  files                 File[]
+  news                  News[]
+  contacts              Contact[]
+  companyProfiles       CompanyProfile[]
+  partners              Partner[]
+  storiesFromGarden     StoriesFromGarden[]
+  partnertshipStandards PartnertshipStandard[]
 
   @@unique([provider, providerId], name: "users_provider_providerId_key")
   @@map("users")
@@ -184,4 +185,18 @@ model StoriesFromGarden {
   user User @relation(fields: [createdBy], references: [id])
 
   @@map("stories_from_garden")
+}
+
+model PartnertshipStandard {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  icon        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+
+  user User @relation(fields: [createdBy], references: [id])
+
+  @@map("partnertship_standard")
 }

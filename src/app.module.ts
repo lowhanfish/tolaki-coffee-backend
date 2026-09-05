@@ -16,6 +16,7 @@ import { TestEndpointModule } from './test-endpoint/test-endpoint.module';
 import { NewsModule } from './news/news.module';
 import { CompanyProfileModule } from './company-profile/company-profile.module';
 import { StoryFromGardenModule } from './story-from-garden/story-from-garden.module';
+import { PartnershipStandardModule } from './partnership-standard/partnership-standard.module';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { StoryFromGardenModule } from './story-from-garden/story-from-garden.mod
     CompanyProfileModule,
     ContactModule, 
     ProductModule, 
-    TestEndpointModule, StoryFromGardenModule
+    TestEndpointModule, StoryFromGardenModule, PartnershipStandardModule
 
   ],
   controllers: [AppController],
