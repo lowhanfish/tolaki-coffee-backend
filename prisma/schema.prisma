@@ -36,6 +36,7 @@ model User {
   news            News[]
   contacts        Contact[]
   companyProfiles CompanyProfile[]
+  partners        Partner[]
 
   @@unique([provider, providerId], name: "users_provider_providerId_key")
   @@map("users")
@@ -73,6 +74,7 @@ model CompanyProfile {
   user     User      @relation(fields: [createdBy], references: [id])
   products Product[]
   contacts Contact[]
+  partners Partner[]
 
   @@map("companyprofile")
 }
@@ -150,4 +152,21 @@ model Contact {
   companyprofile CompanyProfile @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
 
   @@map("contacts")
+}
+
+model Partner {
+  id               String   @id @default(uuid())
+  partner          String
+  area             Float
+  altitude_from    Float
+  altitude_to      Float
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdBy        String
+  companyProfileId String
+
+  user           User           @relation(fields: [createdBy], references: [id])
+  companyProfile CompanyProfile @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
+
+  @@map("partners")
 }
