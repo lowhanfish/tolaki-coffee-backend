@@ -83,6 +83,18 @@ export class ProfileService {
     return { total, skip, limit, data };
   }
 
+  async findCurrent(userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Profile pengguna belum tersedia');
+    }
+
+    return profile;
+  }
+
   async findOne(id: string, userId: string) {
     const profile = await this.prisma.profile.findFirst({
       where: { id, userId },
@@ -91,7 +103,6 @@ export class ProfileService {
     if (!profile) {
       throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`);
     }
-
     return profile;
   }
 

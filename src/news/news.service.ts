@@ -39,8 +39,16 @@ export class NewsService {
         };
 
     }
-    async readOne(id){
-
+    async readOne(id:string){
+        try {
+            const data = await this.prisma.news.findUnique({
+                where : {id}
+            })
+            return data
+        } catch (error:any) {
+            if(error.code == 'P2025') throw new NotFoundException(`data dengan id : ${id} tidak ditemukan...!`)
+            throw error
+        }
     }
 
     async create(file: Express.Multer.File, dto: CreateNewsDto, userId: string){

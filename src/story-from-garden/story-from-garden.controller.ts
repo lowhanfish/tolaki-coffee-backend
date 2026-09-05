@@ -59,7 +59,6 @@ export class StoryFromGardenController {
   }
 
   @Delete('delete/:id')
-  @Public()
   delete(@Param('id', ParseUUIDPipe) id: string) {
     return this.storyFromGardenService.delete(id);
   }

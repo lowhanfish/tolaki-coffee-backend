@@ -4,6 +4,7 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { CountA } from 'src/common/interceptors/a.interceptor';
 import { TestingDto } from './dto/endpoint';
 import { CountB } from 'src/common/interceptors/b.interceptor';
+import { GetCurrentUser } from 'src/auth/decorators/get-current-user.decorator';
 
 
 
@@ -27,6 +28,15 @@ export class TestEndpointController {
     return {
       ...body
     }
+  }
+
+
+
+  @Post('test2')
+  async test2(
+    @GetCurrentUser('userId') userId: string,
+  ){
+
   }
 
 

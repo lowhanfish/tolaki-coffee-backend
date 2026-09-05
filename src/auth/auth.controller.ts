@@ -1,10 +1,21 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { GoogleLoginDTO } from './dto/google-login.dto';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
-import { Public } from './decorators/public.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { RtAuthGuard } from './guards/rt.guard';
 import { GetCurrentUser } from './decorators/get-current-user.decorator';
 import { Throttle } from '@nestjs/throttler';
@@ -29,7 +40,10 @@ export class AuthController {
   @Post('register')
   @Public()
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() dto: RegisterDTO, @Res({ passthrough: true }) response: Response) {
+  async register(
+    @Body() dto: RegisterDTO,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const result = await this.authService.register(dto);
     this.setAuthCookies(response, result.accessToken, result.refreshToken);
     return { message: 'Registrasi berhasil', user: result.user };
@@ -40,7 +54,10 @@ export class AuthController {
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDTO, @Res({ passthrough: true }) response: Response) {
+  async login(
+    @Body() dto: LoginDTO,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const result = await this.authService.login(dto);
     this.setAuthCookies(response, result.accessToken, result.refreshToken);
     return { message: 'Login berhasil', user: result.user };
@@ -52,9 +69,14 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  async googleAuth(@Body() dto: GoogleLoginDTO, @Res({ passthrough: true }) response: Response) {
+  async googleAuth(
+    @Body() dto: GoogleLoginDTO,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     // Memanggil logika verifikasi di AuthService menggunakan field `credential`.
-    const result = await this.authService.authenticateGoogleUser(dto.credential);
+    const result = await this.authService.authenticateGoogleUser(
+      dto.credential,
+    );
 
     // Token tidak dikirim dalam JSON response.
     // Browser akan menyimpannya sebagai cookie dan mengirimkannya otomatis pada request berikutnya.
@@ -77,21 +99,21 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     // RtStrategy sudah membaca cookie dan menempelkan data ke request.user.
-    const result = await this.authService.refreshTokens(
-      userId,
-      refreshToken,
-    );
+    const result = await this.authService.refreshTokens(userId, refreshToken);
 
     // Refresh token juga di-rotate: token lama diganti token baru.
     this.setAuthCookies(response, result.accessToken, result.refreshToken);
-    return { message: 'Token berhasil diperbarui', user: result.user };
+    return { message: 'Token berhasil diperbarui' };
   }
 
   // POST /auth/logout
   // Logout memerlukan access token agar userId bisa diambil dari request.user.
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     // request.user diisi oleh AtStrategy setelah token berhasil diverifikasi.
     await this.authService.logout((request.user as { userId: string }).userId);
 
@@ -101,8 +123,20 @@ export class AuthController {
   }
 
   // Helper ini memastikan semua jenis login memakai konfigurasi cookie yang sama.
-  private setAuthCookies(response: Response, accessToken: string, refreshToken: string) {
-    response.cookie(ACCESS_TOKEN_COOKIE, accessToken, accessTokenCookieOptions());
-    response.cookie(REFRESH_TOKEN_COOKIE, refreshToken, refreshTokenCookieOptions());
+  private setAuthCookies(
+    response: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
+    response.cookie(
+      ACCESS_TOKEN_COOKIE,
+      accessToken,
+      accessTokenCookieOptions(),
+    );
+    response.cookie(
+      REFRESH_TOKEN_COOKIE,
+      refreshToken,
+      refreshTokenCookieOptions(),
+    );
   }
 }

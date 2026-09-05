@@ -42,6 +42,13 @@ export class ProfileController {
     return this.profileService.findAll(query);
   }
 
+  @Get('me')
+  findCurrent(
+    @GetCurrentUser('userId') userId: string,
+  ): Promise<ResponseProfileDto> {
+    return this.profileService.findCurrent(userId);
+  }
+
   @Get('readOne/:id')
   findOne(
     @Param('id', ParseUUIDPipe) id: string,

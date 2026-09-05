@@ -42,7 +42,6 @@ export class NewsController {
   }
 
   @Delete('delete/:id')
-  @Public()
   async delete(@Param('id') id:string){
     return this.newsService.delete(id)
   }

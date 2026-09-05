@@ -34,7 +34,7 @@ export class CompanyProfileController {
 
   @Get('readOne/:id')
   @Public()
-  async readOne(id:string){
+  async readOne(@Param('id') id:string){
     return this.companyProfileService.readOne(id)
   }
 

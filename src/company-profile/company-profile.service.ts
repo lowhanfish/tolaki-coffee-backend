@@ -25,8 +25,8 @@ export class CompanyProfileService {
     }
 
     async read (query:ReadCompanyDto) {
-        const skip = query?.skip ?? 0;
-        const limit = query?.limit ?? 100;
+        const skip = Number(query?.skip ?? 0);
+        const limit = Number(query?.limit ?? 100);
         const searchCondition = query.search? 
         {
             OR : [
@@ -57,7 +57,17 @@ export class CompanyProfileService {
     }
 
     async readOne (id:string) {
-        return id
+        try {
+            const data = await this.prisma.companyProfile.findUnique({
+                where : {id}
+            })
+            return data
+            
+        } catch (error:any) {
+            if(error.code == 'P2025') throw new NotFoundException(`data dengan id : ${id} tidak ditemukan...!`)
+            throw error
+        }
+
     }
 
     async update (id:string, dto:UpdateCompanyDto, file?:Express.Multer.File) {

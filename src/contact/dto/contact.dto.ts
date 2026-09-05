@@ -1,16 +1,20 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsString, IsNumber, IsEmail, IsOptional, IsNotEmpty, IsUUID } from 'class-validator'
 
 export class ReadAllContactDto{
     @IsOptional()
+    @Type(() => Number)
     @IsString()
     search? : string;
 
     @IsOptional()
+    @Type(() => Number)
     @IsNumber()
     skip? : number;
 
     @IsOptional()
+    @Type(()=> Number)
     @IsNumber()
     limit? : number;
 }

@@ -58,7 +58,7 @@ export class AuthService {
     });
 
     // 6. Setelah registrasi berhasil, langsung login-kan user dengan cookie JWT.
-    return this.issueTokens(user.id, user.email, user.name);
+    return this.issueTokens(user.id, user.email);
   }
 
   async login(dto: LoginDTO) {
@@ -80,7 +80,7 @@ export class AuthService {
     }
 
     // 4. Password valid, sehingga terbitkan access token dan refresh token baru.
-    return this.issueTokens(user.id, user.email, user.name);
+    return this.issueTokens(user.id, user.email);
   }
 
   async authenticateGoogleUser(idToken: string) {
@@ -110,28 +110,20 @@ export class AuthService {
       if (!email || !emailVerified) {
         throw new UnauthorizedException('Email Google belum terverifikasi');
       }
+      const normalizedEmail = email.trim().toLowerCase();
 
       // 2. Cari user berdasarkan Email di DB
       // Email diberi @unique di schema.prisma, sehingga findUnique aman digunakan.
       let user = await this.prisma.user.findUnique({
-        where: { email },
+        where: { email: normalizedEmail },
       });
 
       // 3. Jika user belum ada, buat user baru
       if (!user) {
-        // Client Prisma yang sedang terpasang masih mengharuskan password pada tipe create.
-        // User Google tidak login menggunakan password ini; password hanya nilai acak
-        // yang disimpan dalam bentuk hash agar tidak pernah menyimpan password asli.
-        const randomPassword =
-          Math.random().toString(36).slice(-8) +
-          Math.random().toString(36).slice(-8);
-        const hashedPassword = await bcrypt.hash(randomPassword, 10);
-
         user = await this.prisma.user.create({
           data: {
-            email,
+            email: normalizedEmail,
             name: name || 'Google User',
-            password: hashedPassword, // Wajib diisi jika schema belum diubah
             provider: AuthProvider.GOOGLE,
             providerId,
             profile: {
@@ -163,7 +155,7 @@ export class AuthService {
 
       // 4. User sudah ditemukan atau berhasil dibuat.
       // Sekarang buat access token dan refresh token untuk aplikasi kita sendiri.
-      return this.issueTokens(user.id, user.email, user.name);
+      return this.issueTokens(user.id, user.email);
     } catch (error) {
       // Error UnauthorizedException sengaja diteruskan agar pesan validasi tetap jelas.
       // Error lain disamarkan sebagai error autentikasi agar detail internal tidak bocor.
@@ -190,7 +182,7 @@ export class AuthService {
       }
 
       // Jika valid, terbitkan pasangan token baru dan ganti hash refresh token lama.
-      return this.issueTokens(user.id, user.email, user.name);
+      return this.issueTokensWithoutUser(user.id, user.email);
     } catch (error) {
       // Token kadaluarsa, token rusak, user tidak ditemukan, atau hash tidak cocok
       // semuanya diperlakukan sebagai refresh token yang tidak valid.
@@ -210,7 +202,46 @@ export class AuthService {
     });
   }
 
-  private async issueTokens(id: string, email: string, name: string | null) {
+  private async issueTokens(id: string, email: string) {
+    const { accessToken, refreshToken, hashedRt } = await this.createTokenPair(
+      id,
+      email,
+    );
+
+    // Menyimpan hash juga menerapkan konsep satu refresh token aktif per user.
+    // Penerbitan token baru otomatis menggantikan token sebelumnya.
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: { hashedRt },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        profile: true,
+      },
+    });
+
+    // Token dikembalikan ke controller agar controller dapat memasukkannya ke httpOnly cookie.
+    // Object user hanya berisi field yang aman untuk response dan profile terbaru.
+    return { accessToken, refreshToken, user };
+  }
+
+  private async issueTokensWithoutUser(id: string, email: string) {
+    const { accessToken, refreshToken, hashedRt } = await this.createTokenPair(
+      id,
+      email,
+    );
+
+    // Refresh hanya merotasi token sehingga tidak perlu memuat relasi profile.
+    await this.prisma.user.update({
+      where: { id },
+      data: { hashedRt },
+    });
+
+    return { accessToken, refreshToken };
+  }
+
+  private async createTokenPair(id: string, email: string) {
     // Access token berumur pendek dan dipakai untuk mengakses endpoint terlindungi.
     const accessToken = this.jwtService.sign(
       { sub: id, email, type: 'access' },
@@ -227,12 +258,6 @@ export class AuthService {
     // Jika database bocor, token asli tidak langsung dapat dipakai.
     const hashedRt = await bcrypt.hash(refreshToken, 10);
 
-    // Menyimpan hash juga menerapkan konsep satu refresh token aktif per user.
-    // Penerbitan token baru otomatis menggantikan token sebelumnya.
-    await this.prisma.user.update({ where: { id }, data: { hashedRt } });
-
-    // Token dikembalikan ke controller agar controller dapat memasukkannya ke httpOnly cookie.
-    // Object user hanya berisi field yang aman untuk response.
-    return { accessToken, refreshToken, user: { id, email, name } };
+    return { accessToken, refreshToken, hashedRt };
   }
 }

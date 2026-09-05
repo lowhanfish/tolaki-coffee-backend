@@ -1,4 +1,5 @@
 import { PartialType, ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {Allow ,IsString, IsNumber, IsNotEmpty, IsOptional} from 'class-validator'
 
 
@@ -33,10 +34,12 @@ export class CreateNewsDto{
 
 export class ReadNewsDto{
     @IsNumber()
+    @Type(() => Number)
     @IsOptional()
     skip? : number;
 
     @IsNumber()
+    @Type(() => Number)
     @IsOptional()
     limit? : number;
     
