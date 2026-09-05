@@ -1,13 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+} from '@nestjs/common';
+import { ApiConsumes } from '@nestjs/swagger';
+import { GetCurrentUser } from '../auth/decorators/get-current-user.decorator';
+import { UploadSingle } from '../common/decorators/upload-file.decorator';
+import {
+  CreateProfileDto,
+  ReadProfileDto,
+  ResponseAllProfileDto,
+  ResponseProfileDto,
+  UpdateProfileDto,
+} from './dto/profile.dto';
 import { ProfileService } from './profile.service';
-import { CreateProfileDto } from './dto/profile.dto';
-import { Public } from 'src/common/decorators/public.decorator';
-import { ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { createProfile } from './swagger/profile.swagger';
-
-
-import { UploadAndSavePolymorphic, UploadMultipleAndSavePolymorphic } from 'src/common/decorators/upload-polymorphic.decorator';
-
 
 @Controller('profile')
 export class ProfileController {
@@ -15,32 +28,45 @@ export class ProfileController {
 
   @Post('create')
   @ApiConsumes('multipart/form-data')
-  @ApiBody({schema : createProfile})
-  @Public()
-  @UploadAndSavePolymorphic('profile', 'file', './uploads/aaa')
-  create(@UploadedFile() file: Express.Multer.File, @Body() createProfileDto: CreateProfileDto) {
-    return this.profileService.create(createProfileDto);
+  @UploadSingle('file', './uploads/profile')
+  create(
+    @Body() dto: CreateProfileDto,
+    @GetCurrentUser('userId') userId: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<ResponseProfileDto> {
+    return this.profileService.create(dto, userId, file);
   }
 
-  @Get()
-  findAll() {
-    return this.profileService.findAll();
+  @Get('read')
+  findAll(@Query() query: ReadProfileDto): Promise<ResponseAllProfileDto> {
+    return this.profileService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.profileService.findOne(+id);
+  @Get('readOne/:id')
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetCurrentUser('userId') userId: string,
+  ): Promise<ResponseProfileDto> {
+    return this.profileService.findOne(id, userId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProfileDto: CreateProfileDto) {
-    return this.profileService.update(+id, updateProfileDto);
+  @Patch('update/:id')
+  @ApiConsumes('multipart/form-data')
+  @UploadSingle('file', './uploads/profile')
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateProfileDto,
+    @GetCurrentUser('userId') userId: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<ResponseProfileDto> {
+    return this.profileService.update(id, dto, userId, file);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.profileService.remove(+id);
+  @Delete('delete/:id')
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @GetCurrentUser('userId') userId: string,
+  ) {
+    return this.profileService.remove(id, userId);
   }
-
-
 }

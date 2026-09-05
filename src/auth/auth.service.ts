@@ -1,11 +1,16 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from '../prisma/prisma.service'; // Sesuaikan path PrismaService Anda
 import * as bcrypt from 'bcrypt';
 import { LoginDTO } from './dto/login.dto';
 import { RegisterDTO } from './dto/register.dto';
-import { AuthProvider } from '../../generated/prisma/enums';
+import { AuthProvider, AvatarSource } from '../../generated/prisma/enums';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +36,9 @@ export class AuthService {
     }
 
     // 3. Cek apakah email sudah terdaftar sebelum membuat record baru.
-    const existingUser = await this.prisma.user.findUnique({ where: { email } });
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
     if (existingUser) {
       throw new ConflictException('Email sudah terdaftar');
     }
@@ -88,9 +95,16 @@ export class AuthService {
       const payload = ticket.getPayload();
 
       // Payload berisi informasi user yang sudah ditandatangani oleh Google.
-      if (!payload) throw new UnauthorizedException('Payload token Google tidak valid');
+      if (!payload)
+        throw new UnauthorizedException('Payload token Google tidak valid');
 
-      const { email, name, sub: providerId, email_verified: emailVerified } = payload;
+      const {
+        email,
+        name,
+        picture,
+        sub: providerId,
+        email_verified: emailVerified,
+      } = payload;
       // Email diperlukan sebagai identitas user lokal.
       // Hanya email yang sudah diverifikasi Google yang boleh dipakai login.
       if (!email || !emailVerified) {
@@ -108,7 +122,9 @@ export class AuthService {
         // Client Prisma yang sedang terpasang masih mengharuskan password pada tipe create.
         // User Google tidak login menggunakan password ini; password hanya nilai acak
         // yang disimpan dalam bentuk hash agar tidak pernah menyimpan password asli.
-        const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+        const randomPassword =
+          Math.random().toString(36).slice(-8) +
+          Math.random().toString(36).slice(-8);
         const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
         user = await this.prisma.user.create({
@@ -118,7 +134,30 @@ export class AuthService {
             password: hashedPassword, // Wajib diisi jika schema belum diubah
             provider: AuthProvider.GOOGLE,
             providerId,
+            profile: {
+              create: {
+                avatarUrl: picture ?? null,
+                avatarSource: picture ? AvatarSource.GOOGLE : null,
+              },
+            },
           },
+        });
+      } else {
+        // Akun lama mungkin dibuat sebelum profile/avatar Google diterapkan.
+        // Upsert memastikan profile tersedia tanpa mengubah field profile lainnya.
+        await this.prisma.profile.upsert({
+          where: { userId: user.id },
+          create: {
+            userId: user.id,
+            avatarUrl: picture ?? null,
+            avatarSource: picture ? AvatarSource.GOOGLE : null,
+          },
+          update: picture
+            ? {
+                avatarUrl: picture,
+                avatarSource: AvatarSource.GOOGLE,
+              }
+            : {},
         });
       }
 
@@ -129,7 +168,9 @@ export class AuthService {
       // Error UnauthorizedException sengaja diteruskan agar pesan validasi tetap jelas.
       // Error lain disamarkan sebagai error autentikasi agar detail internal tidak bocor.
       if (error instanceof UnauthorizedException) throw error;
-      throw new UnauthorizedException('Token Google tidak valid atau telah kadaluarsa');
+      throw new UnauthorizedException(
+        'Token Google tidak valid atau telah kadaluarsa',
+      );
     }
   }
 
@@ -141,7 +182,10 @@ export class AuthService {
 
       // Bandingkan refresh token asli dengan hash yang tersimpan di database.
       // Ini membuat database tidak perlu menyimpan refresh token dalam bentuk plaintext.
-      if (!user?.hashedRt || !(await bcrypt.compare(refreshToken, user.hashedRt))) {
+      if (
+        !user?.hashedRt ||
+        !(await bcrypt.compare(refreshToken, user.hashedRt))
+      ) {
         throw new UnauthorizedException('Refresh token tidak valid');
       }
 
@@ -151,7 +195,9 @@ export class AuthService {
       // Token kadaluarsa, token rusak, user tidak ditemukan, atau hash tidak cocok
       // semuanya diperlakukan sebagai refresh token yang tidak valid.
       if (error instanceof UnauthorizedException) throw error;
-      throw new UnauthorizedException('Refresh token tidak valid atau telah kadaluarsa');
+      throw new UnauthorizedException(
+        'Refresh token tidak valid atau telah kadaluarsa',
+      );
     }
   }
 

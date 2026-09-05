@@ -32,6 +32,9 @@ describe('AuthService', () => {
               create: jest.fn(),
               update: jest.fn(),
             },
+            profile: {
+              upsert: jest.fn(),
+            },
           },
         },
       ],

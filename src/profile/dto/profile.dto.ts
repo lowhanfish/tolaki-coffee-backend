@@ -1,20 +1,58 @@
-import {IsString, IsNumber, IsNotEmpty, IsOptional} from 'class-validator'
+import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { Allow, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateProfileDto {
+  @IsOptional()
+  @IsString()
+  bio?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    brand : string;
+  @IsOptional()
+  @IsString()
+  phone?: string;
 
-    @IsString()
-    @IsOptional()
-    quotes : string;
-    
-    @IsString()
-    description : string;
-    
-    @IsString()
-    @IsOptional()
-    detail : string;
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @Allow()
+  file?: any;
 }
 
+export class UpdateProfileDto extends PartialType(CreateProfileDto) {}
+
+export class ReadProfileDto {
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  skip?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  limit?: number;
+}
+
+export class ResponseProfileDto {
+  id: string;
+  userId: string;
+  bio: string | null;
+  phone: string | null;
+  avatarUrl: string | null;
+  avatarSource: 'LOCAL' | 'GOOGLE' | null;
+  address: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class ResponseAllProfileDto {
+  total: number;
+  skip: number;
+  limit: number;
+  data: ResponseProfileDto[];
+}

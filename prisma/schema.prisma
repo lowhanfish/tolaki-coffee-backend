@@ -20,6 +20,11 @@ enum AuthProvider {
   FACEBOOK
 }
 
+enum AvatarSource {
+  LOCAL
+  GOOGLE
+}
+
 model User {
   id                    String                 @id @default(uuid())
   email                 String                 @unique
@@ -45,14 +50,15 @@ model User {
 }
 
 model Profile {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  bio       String?  @db.Text
-  phone     String?
-  avatarUrl String?
-  address   String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(uuid())
+  userId       String        @unique
+  bio          String?       @db.Text
+  phone        String?
+  avatarUrl    String?
+  avatarSource AvatarSource?
+  address      String?       @db.Text
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
