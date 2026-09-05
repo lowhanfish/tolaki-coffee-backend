@@ -21,22 +21,23 @@ enum AuthProvider {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  email           String           @unique
-  name            String?
-  password        String? // Nullable because Google users may not have a local password.
-  hashedRt        String?
-  provider        AuthProvider     @default(LOCAL)
-  providerId      String?
-  profile         Profile?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  products        Product[]
-  files           File[]
-  news            News[]
-  contacts        Contact[]
-  companyProfiles CompanyProfile[]
-  partners        Partner[]
+  id                String              @id @default(uuid())
+  email             String              @unique
+  name              String?
+  password          String? // Nullable because Google users may not have a local password.
+  hashedRt          String?
+  provider          AuthProvider        @default(LOCAL)
+  providerId        String?
+  profile           Profile?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  products          Product[]
+  files             File[]
+  news              News[]
+  contacts          Contact[]
+  companyProfiles   CompanyProfile[]
+  partners          Partner[]
+  storiesFromGarden StoriesFromGarden[]
 
   @@unique([provider, providerId], name: "users_provider_providerId_key")
   @@map("users")
@@ -169,4 +170,18 @@ model Partner {
   companyProfile CompanyProfile @relation(fields: [companyProfileId], references: [id], onDelete: Cascade)
 
   @@map("partners")
+}
+
+model StoriesFromGarden {
+  id        String   @id @default(uuid())
+  title     String
+  news      String   @db.Text
+  file      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+
+  user User @relation(fields: [createdBy], references: [id])
+
+  @@map("stories_from_garden")
 }
