@@ -15,6 +15,7 @@ import { ProductModule } from './product/product.module';
 import { TestEndpointModule } from './test-endpoint/test-endpoint.module';
 import { NewsModule } from './news/news.module';
 import { CompanyProfileModule } from './company-profile/company-profile.module';
+import { StoryFromGardenModule } from './story-from-garden/story-from-garden.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { CompanyProfileModule } from './company-profile/company-profile.module';
     CompanyProfileModule,
     ContactModule, 
     ProductModule, 
-    TestEndpointModule
+    TestEndpointModule, StoryFromGardenModule
 
   ],
   controllers: [AppController],
