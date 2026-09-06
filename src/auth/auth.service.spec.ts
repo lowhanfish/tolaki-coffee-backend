@@ -58,13 +58,8 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  it('returns the user profile after a successful login', async () => {
+  it('returns safe user fields without profile after a successful login', async () => {
     const password = await bcrypt.hash('correct-password', 10);
-    const profile = {
-      id: 'profile-1',
-      userId: 'user-1',
-      bio: 'Coffee lover',
-    };
 
     userFindUnique.mockResolvedValue({
       id: 'user-1',
@@ -77,7 +72,6 @@ describe('AuthService', () => {
       id: 'user-1',
       email: 'user@example.com',
       name: 'User',
-      profile,
     });
 
     await expect(
@@ -88,7 +82,11 @@ describe('AuthService', () => {
     ).resolves.toMatchObject({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
-      user: { id: 'user-1', profile },
+      user: {
+        id: 'user-1',
+        email: 'user@example.com',
+        name: 'User',
+      },
     });
 
     expect(userUpdate).toHaveBeenCalledWith(
@@ -97,7 +95,6 @@ describe('AuthService', () => {
           id: true,
           email: true,
           name: true,
-          profile: true,
         },
       }),
     );

@@ -217,12 +217,11 @@ export class AuthService {
         id: true,
         email: true,
         name: true,
-        profile: true,
       },
     });
 
     // Token dikembalikan ke controller agar controller dapat memasukkannya ke httpOnly cookie.
-    // Object user hanya berisi field yang aman untuk response dan profile terbaru.
+    // Profile diambil terpisah melalui GET /profile/me.
     return { accessToken, refreshToken, user };
   }
 

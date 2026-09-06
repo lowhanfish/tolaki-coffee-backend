@@ -30,9 +30,8 @@ export class TestEndpointController {
     }
   }
 
-
-
   @Post('test2')
+  @UseInterceptors()
   async test2(
     @GetCurrentUser('userId') userId: string,
   ){
