@@ -13,6 +13,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let jwtSign: jest.Mock;
   let userFindUnique: jest.Mock;
+  let userCreate: jest.Mock;
   let userUpdate: jest.Mock;
 
   beforeEach(async () => {
@@ -21,6 +22,7 @@ describe('AuthService', () => {
       .mockReturnValueOnce('access-token')
       .mockReturnValueOnce('refresh-token');
     userFindUnique = jest.fn();
+    userCreate = jest.fn();
     userUpdate = jest.fn();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -40,7 +42,7 @@ describe('AuthService', () => {
           useValue: {
             user: {
               findUnique: userFindUnique,
-              create: jest.fn(),
+              create: userCreate,
               update: userUpdate,
             },
             profile: {
@@ -58,20 +60,50 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  it('returns safe user fields without profile after a successful login', async () => {
+  it('stores the registrant name in profile instead of user', async () => {
+    userFindUnique.mockResolvedValue(null);
+    userCreate.mockResolvedValue({
+      id: 'user-1',
+      email: 'user@example.com',
+    });
+    userUpdate.mockResolvedValue({
+      id: 'user-1',
+      email: 'user@example.com',
+    });
+
+    await service.register({
+      email: 'USER@example.com',
+      name: ' User Name ',
+      password: 'secret12',
+      passwordConfirmation: 'secret12',
+    });
+
+    expect(userCreate).toHaveBeenCalledWith({
+      data: {
+        email: 'user@example.com',
+        password: expect.any(String),
+        provider: 'LOCAL',
+        profile: {
+          create: {
+            name: 'User Name',
+          },
+        },
+      },
+    });
+  });
+
+  it('returns safe account fields without profile after a successful login', async () => {
     const password = await bcrypt.hash('correct-password', 10);
 
     userFindUnique.mockResolvedValue({
       id: 'user-1',
       email: 'user@example.com',
-      name: 'User',
       password,
       provider: 'LOCAL',
     });
     userUpdate.mockResolvedValue({
       id: 'user-1',
       email: 'user@example.com',
-      name: 'User',
     });
 
     await expect(
@@ -85,7 +117,6 @@ describe('AuthService', () => {
       user: {
         id: 'user-1',
         email: 'user@example.com',
-        name: 'User',
       },
     });
 
@@ -94,7 +125,6 @@ describe('AuthService', () => {
         select: {
           id: true,
           email: true,
-          name: true,
         },
       }),
     );
@@ -105,7 +135,6 @@ describe('AuthService', () => {
     userFindUnique.mockResolvedValue({
       id: 'user-1',
       email: 'user@example.com',
-      name: 'User',
       hashedRt: hashedRefreshToken,
     });
     userUpdate.mockResolvedValue({ id: 'user-1' });

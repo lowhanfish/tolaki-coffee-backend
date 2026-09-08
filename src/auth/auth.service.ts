@@ -47,13 +47,18 @@ export class AuthService {
     // Angka 10 adalah bcrypt salt rounds yang digunakan untuk membuat hash.
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    // 5. Buat user manual di database menggunakan email, name, dan password hash.
+    // 5. Buat akun dan profile dalam satu operasi atomik.
+    // Data identitas seperti nama hanya disimpan di profile, bukan di users.
     const user = await this.prisma.user.create({
       data: {
         email,
-        name: dto.name?.trim() || null,
         password: hashedPassword,
         provider: AuthProvider.LOCAL,
+        profile: {
+          create: {
+            name: dto.name?.trim() || null,
+          },
+        },
       },
     });
 
@@ -123,11 +128,11 @@ export class AuthService {
         user = await this.prisma.user.create({
           data: {
             email: normalizedEmail,
-            name: name || 'Google User',
             provider: AuthProvider.GOOGLE,
             providerId,
             profile: {
               create: {
+                name: name?.trim() || 'Google User',
                 avatarUrl: picture ?? null,
                 avatarSource: picture ? AvatarSource.GOOGLE : null,
               },
@@ -141,6 +146,7 @@ export class AuthService {
           where: { userId: user.id },
           create: {
             userId: user.id,
+            name: name?.trim() || 'Google User',
             avatarUrl: picture ?? null,
             avatarSource: picture ? AvatarSource.GOOGLE : null,
           },
@@ -216,7 +222,6 @@ export class AuthService {
       select: {
         id: true,
         email: true,
-        name: true,
       },
     });
 

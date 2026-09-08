@@ -1,8 +1,21 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Allow, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  Allow,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateProfileDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  name?: string;
+
   @IsOptional()
   @IsString()
   bio?: string;
@@ -41,6 +54,7 @@ export class ReadProfileDto {
 export class ResponseProfileDto {
   id: string;
   userId: string;
+  name: string | null;
   bio: string | null;
   phone: string | null;
   avatarUrl: string | null;

@@ -63,6 +63,7 @@ export class ProfileService {
     const where = query?.search
       ? {
           OR: [
+            { name: { contains: query.search } },
             { bio: { contains: query.search } },
             { phone: { contains: query.search } },
             { address: { contains: query.search } },
