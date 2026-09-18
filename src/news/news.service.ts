@@ -21,12 +21,13 @@ export class NewsService {
       : {};
 
     const [data, total] = await Promise.all([
-      await this.prisma.news.findMany({
+      this.prisma.news.findMany({
         where: searchCondition,
         skip: skip,
         take: limit,
+        orderBy: { createdAt: 'desc' },
       }),
-      await this.prisma.news.count({
+      this.prisma.news.count({
         where: searchCondition,
       }),
     ]);

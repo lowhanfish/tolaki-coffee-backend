@@ -24,6 +24,7 @@ export class NewsController {
   }
   
   @Get('read')
+  @Public()
   async read(@Query() query:ReadNewsDto){
     return this.newsService.read(query)
   }
