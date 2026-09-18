@@ -23,8 +23,7 @@ export class CreatePartnerDto {
   @IsNumber()
   altitude_to: number;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: 'uuid', required: false })
   @IsUUID()
-  @IsNotEmpty()
-  companyProfileId: string;
+  companyProfileId?: string;
 }

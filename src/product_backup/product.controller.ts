@@ -48,15 +48,11 @@ export class ProductController {
   }
 
   @Patch('update/:id')
-  @ApiConsumes('multipart/form-data')
-  @UploadMultiple('files', 20, './uploads/product')
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProductDto,
-    @UploadedFiles() files: Express.Multer.File[],
-    @GetCurrentUser('userId') userId: string,
   ) {
-    return this.productService.update(id, dto, files, userId);
+    return this.productService.update(id, dto);
   }
 
   @Delete('delete/:id')

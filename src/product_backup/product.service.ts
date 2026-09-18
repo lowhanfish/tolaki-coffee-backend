@@ -16,29 +16,21 @@ export class ProductService {
     files: Express.Multer.File[],
     userId: string,
   ) {
-    let companyProfileId = dto.companyProfileId;
-    if (!companyProfileId) {
-      const comp =
-        (await this.prisma.companyProfile.findFirst({
-          where: { createdBy: userId },
-        })) || (await this.prisma.companyProfile.findFirst());
-      if (!comp) {
-        throw new NotFoundException(
-          'Silakan buat profil perusahaan terlebih dahulu.',
-        );
-      }
-      companyProfileId = comp.id;
-    }
+    console.log('============ DTO ============');
+    console.log(dto);
+    console.log('============ DTO ============');
 
-    const { files: _files, companyProfileId: _, ...productData } = dto;
+    console.log('============ FILES ============');
+    console.log(files);
+    console.log('============ FILES ============');
+
+    const { files: _files, ...productData } = dto;
+
     const product = await this.prisma.$transaction(async (tx) => {
       const createdProduct = await tx.product.create({
-        data: {
-          ...productData,
-          companyProfileId,
-          createdBy: userId,
-        },
+        data: { ...productData, createdBy: userId },
       });
+
       if (files?.length) {
         await tx.file.createMany({
           data: files.map((file) => ({
@@ -51,14 +43,16 @@ export class ProductService {
           })),
         });
       }
+
       return createdProduct;
     });
+
     return this.findOne(product.id);
   }
 
   async findAll(query: ReadProductDto) {
-    const skip = Number(query?.skip ?? 0);
-    const limit = Number(query?.limit ?? 100);
+    const skip = query?.skip ?? 0;
+    const limit = query?.limit ?? 100;
     const where = query?.search
       ? {
           OR: [
@@ -104,36 +98,13 @@ export class ProductService {
     return { ...product, files };
   }
 
-  async update(
-    id: string,
-    dto: UpdateProductDto,
-    files?: Express.Multer.File[],
-    userId?: string,
-  ) {
+  async update(id: string, dto: UpdateProductDto) {
     try {
-      const { files: _files, companyProfileId, ...productData } = dto;
-      const updated = await this.prisma.product.update({
+      const { files: _files, ...productData } = dto;
+      return await this.prisma.product.update({
         where: { id },
-        data: {
-          ...productData,
-          ...(companyProfileId ? { companyProfileId } : {}),
-        },
+        data: productData,
       });
-
-      if (files?.length && userId) {
-        await this.prisma.file.createMany({
-          data: files.map((file) => ({
-            title: file.filename,
-            type: file.mimetype,
-            path: file.path,
-            table_name: PRODUCT_TABLE_NAME,
-            table_id: id,
-            createdBy: userId,
-          })),
-        });
-      }
-
-      return this.findOne(updated.id);
     } catch (error: any) {
       if (error?.code === 'P2025')
         throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`);

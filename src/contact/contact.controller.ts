@@ -1,11 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ContactService } from './contact.service';
-import { CreateContactDto, UpdateContactDto, ReadAllContactDto, ResponseContactDto, ResponseContactOnceDto } from './dto/contact.dto';
-import { ApiCreatedResponse } from '@nestjs/swagger';
+import { CreateContactDto, UpdateContactDto, ReadAllContactDto, ResponseContactDto, ResponseContactOnceDto, CreateInquiryDto } from './dto/contact.dto';
 import { Public } from 'src/common/decorators/public.decorator';
 import { GetCurrentUser } from 'src/auth/decorators/get-current-user.decorator';
-
-
 
 @Controller('contact')
 export class ContactController {
@@ -15,18 +12,18 @@ export class ContactController {
   async create(
     @Body() createContactDto: CreateContactDto,
     @GetCurrentUser('userId') userId: string,
-  ): Promise<ResponseContactOnceDto> {
+  ): Promise<any> {
     return this.contactService.create(createContactDto, userId);
   }
 
   @Get('read')
   @Public()
-  async findAll(@Query() query:ReadAllContactDto):Promise<ResponseContactDto> {
+  async findAll(@Query() query: ReadAllContactDto): Promise<ResponseContactDto> {
     return this.contactService.findAll(query);
   }
 
   @Patch('update/:id')
-  async update(@Param('id') id: string, @Body() updateContactDto:UpdateContactDto): Promise<ResponseContactOnceDto> {
+  async update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto): Promise<any> {
     return this.contactService.update(id, updateContactDto);
   }
 
@@ -37,8 +34,24 @@ export class ContactController {
 
   @Get('readOne/:id')
   @Public()
-  async findOne(@Param('id') id: string):Promise<ResponseContactOnceDto> {
+  async findOne(@Param('id') id: string): Promise<any> {
     return this.contactService.findOne(id);
   }
 
+  // Inquiry endpoints
+  @Post('send-message')
+  @Public()
+  async sendMessage(@Body() dto: CreateInquiryDto) {
+    return this.contactService.createInquiry(dto);
+  }
+
+  @Get('messages')
+  async getMessages() {
+    return this.contactService.findAllInquiries();
+  }
+
+  @Delete('messages/:id')
+  async deleteMessage(@Param('id') id: string) {
+    return this.contactService.deleteInquiry(id);
+  }
 }

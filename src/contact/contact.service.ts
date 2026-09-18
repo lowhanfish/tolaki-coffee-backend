@@ -1,115 +1,126 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateContactDto, UpdateContactDto } from './dto/contact.dto';
+import { CreateContactDto, UpdateContactDto, CreateInquiryDto } from './dto/contact.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-
-
-const response = {
-    id : "",
-    storeName : "",
-    address : "",
-    phone : "",
-    email : "",
-    mapsUrl : "",
-    openHours : "",
-    instagram : "",
-    facebook : "",
-    tiktok : "",
-    tokopedia : "",
-    shopee : "",
-}
-
 
 @Injectable()
 export class ContactService {
-
-  constructor(
-    private prisma : PrismaService
-  ){}
-
+  constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateContactDto, userId: string) {
-    const query = await this.prisma.contact.create({
+    let companyProfileId = dto.companyProfileId;
+    if (!companyProfileId) {
+      const comp =
+        (await this.prisma.companyProfile.findFirst({
+          where: { createdBy: userId },
+        })) || (await this.prisma.companyProfile.findFirst());
+      if (!comp) {
+        throw new NotFoundException('Silakan buat profil perusahaan terlebih dahulu.');
+      }
+      companyProfileId = comp.id;
+    }
+
+    return this.prisma.contact.create({
       data: {
         ...dto,
+        companyProfileId,
         createdBy: userId,
       },
-    })
-    return query
+    });
   }
 
-  async findAll(query) {
+  async findAll(query: any) {
+    const skip = Number(query?.skip ?? 0);
+    const limit = Number(query?.limit ?? 100);
 
-    const skip = Number(query?.skip?? 0)
-    const limit = Number(query?.limit?? 100)
-
-    const searchCondititon = query.search ?
-    {
-      OR : [
-        {storeName : {contains : query.search, mode : 'insensitive' as const}},
-      ]
-    } :{}
+    const searchCondition = query?.search
+      ? {
+          OR: [
+            { storeName: { contains: query.search } },
+            { address: { contains: query.search } },
+          ],
+        }
+      : {};
 
     const [data, total] = await Promise.all([
       this.prisma.contact.findMany({
-        where : searchCondititon,
-        skip : skip,
-        take : limit,
-        orderBy : {
-          createdAt : 'desc'
-        }
-      })
-      ,
+        where: searchCondition,
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
       this.prisma.contact.count({
-        where : searchCondititon,
-      })
-    ])
+        where: searchCondition,
+      }),
+    ]);
 
     return {
-      total : total,
-      skip : skip,
-      limit : limit,
-      data : data
+      total,
+      skip,
+      limit,
+      data,
     };
   }
 
   async findOne(id: string) {
     const query = await this.prisma.contact.findUnique({
-      where : {id}
+      where: { id },
     });
     if (!query) {
       throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`);
     }
-    return query
+    return query;
   }
 
-  async update(id: string, dto:UpdateContactDto) {
+  async update(id: string, dto: UpdateContactDto) {
     try {
-      const query = await this.prisma.contact.update({
-        where : {id},
-        data : dto
-      })
-      return query
-    } catch (error:any) {
-      if(error?.code == 'P2025'){
-        throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`)
+      return await this.prisma.contact.update({
+        where: { id },
+        data: dto,
+      });
+    } catch (error: any) {
+      if (error?.code === 'P2025') {
+        throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`);
       }
-      throw error
+      throw error;
     }
   }
 
   async delete(id: string) {
-
     try {
       await this.prisma.contact.delete({
-        where : {id},
-      })
+        where: { id },
+      });
       return { message: `Data dengan id : ${id} berhasil dihapus..!` };
-    } catch (error:any) {
-      if(error?.code == 'P2025') throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`)
-        throw error
+    } catch (error: any) {
+      if (error?.code === 'P2025')
+        throw new NotFoundException(`Data dengan id : ${id} tidak ditemukan`);
+      throw error;
     }
   }
 
+  // Inquiries from visitors
+  async createInquiry(dto: CreateInquiryDto) {
+    return this.prisma.inquiry.create({
+      data: dto,
+    });
+  }
 
+  async findAllInquiries() {
+    return this.prisma.inquiry.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 
+  async deleteInquiry(id: string) {
+    try {
+      await this.prisma.inquiry.delete({ where: { id } });
+      return { message: `Pesan berhasil dihapus` };
+    } catch (error: any) {
+      if (error?.code === 'P2025')
+        throw new NotFoundException(`Pesan tidak ditemukan`);
+      throw error;
+    }
+  }
 }

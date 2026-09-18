@@ -37,6 +37,7 @@ export class StoryFromGardenController {
   }
 
   @Get('read')
+  @Public()
   read(@Query() query: ReadStoryFromGardenDto) {
     return this.storyFromGardenService.read(query);
   }

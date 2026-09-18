@@ -6,38 +6,29 @@ import { TestingDto } from './dto/endpoint';
 import { CountB } from 'src/common/interceptors/b.interceptor';
 import { GetCurrentUser } from 'src/auth/decorators/get-current-user.decorator';
 
-
-
 @Controller('test-endpoint')
 export class TestEndpointController {
   constructor(private readonly testEndpointService: TestEndpointService) {}
 
   @Get('check-auth')
   @Public()
-  checkAuth(){
+  checkAuth() {
     return {
-      "message": "Authorized",
-      "statusCode": 200
-    }
+      message: 'Authorized',
+      statusCode: 200,
+    };
   }
 
   @Post('test')
   @Public()
   @UseInterceptors(CountA, CountB)
-  test(@Body() body:TestingDto){
+  test(@Body() body: TestingDto) {
     return {
-      ...body
-    }
+      ...body,
+    };
   }
 
   @Post('test2')
   @UseInterceptors()
-  async test2(
-    @GetCurrentUser('userId') userId: string,
-  ){
-
-  }
-
-
-
+  async test2(@GetCurrentUser('userId') userId: string) {}
 }

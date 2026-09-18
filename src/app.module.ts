@@ -8,39 +8,42 @@ import { ProfileModule } from './profile/profile.module';
 import { ConfigModule } from '@nestjs/config';
 
 import { AuthModule } from './auth/auth.module';
-import {APP_GUARD} from '@nestjs/core'
+import { APP_GUARD } from '@nestjs/core';
 import { AtAuthGuard } from './auth/guards/at.guard';
 import { ContactModule } from './contact/contact.module';
-import { ProductModule } from './product/product.module';
 import { TestEndpointModule } from './test-endpoint/test-endpoint.module';
 import { NewsModule } from './news/news.module';
 import { CompanyProfileModule } from './company-profile/company-profile.module';
 import { StoryFromGardenModule } from './story-from-garden/story-from-garden.module';
 import { PartnershipStandardModule } from './partnership-standard/partnership-standard.module';
+import { ProductModule } from './product/product.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // 👈 1. Tambahkan ini di imports agar env terbaca di seluruh modul
     }),
-    PrismaModule, 
+    PrismaModule,
     AuthModule,
-    NewsModule, 
-    PartnerModule, 
-    ProfileModule, 
+    NewsModule,
+    PartnerModule,
+    ProfileModule,
     CompanyProfileModule,
-    ContactModule, 
-    ProductModule, 
-    TestEndpointModule, StoryFromGardenModule, PartnershipStandardModule
-
+    ContactModule,
+    TestEndpointModule,
+    StoryFromGardenModule,
+    PartnershipStandardModule,
+    ProductModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     {
-      provide : APP_GUARD,
-      useClass : AtAuthGuard
-    }
+      provide: APP_GUARD,
+      useClass: AtAuthGuard,
+    },
   ],
 })
 export class AppModule {}

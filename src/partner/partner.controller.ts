@@ -24,6 +24,12 @@ export class PartnerController {
     return this.partnerService.findAll(query);
   }
 
+  @Get('read')
+  @Public()
+  read(@Query() query: ReadPartnerDto) {
+    return this.partnerService.findAll(query);
+  }
+
   @Get('readOne/:id')
   @Public()
   findOne(@Param('id', ParseUUIDPipe) id: string) {

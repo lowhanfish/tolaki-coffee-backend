@@ -1,15 +1,30 @@
-import { Controller, Post, Get, Patch, Delete, Query, Param, Body, UploadedFile, UploadedFiles } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Delete,
+  Query,
+  Param,
+  Body,
+  UploadedFile,
+  UploadedFiles,
+} from '@nestjs/common';
 import { CompanyProfileService } from './company-profile.service';
 import { Public } from 'src/common/decorators/public.decorator';
-import { UploadSingle, UploadMultiple } from 'src/common/decorators/upload-file.decorator';
-import { CreateCompanyDto, UpdateCompanyDto, ResponseAllCompanyDto, ResponseOnceCompanyDto, ReadCompanyDto } from './dto/company-profile.dto';
+import {
+  UploadSingle,
+  UploadMultiple,
+} from 'src/common/decorators/upload-file.decorator';
+import {
+  CreateCompanyDto,
+  UpdateCompanyDto,
+  ResponseAllCompanyDto,
+  ResponseOnceCompanyDto,
+  ReadCompanyDto,
+} from './dto/company-profile.dto';
 import { ApiConsumes } from '@nestjs/swagger';
 import { GetCurrentUser } from 'src/auth/decorators/get-current-user.decorator';
-
-
-
-
-
 
 @Controller('company-profile')
 export class CompanyProfileController {
@@ -19,39 +34,43 @@ export class CompanyProfileController {
   @ApiConsumes('multipart/form-data')
   @UploadSingle('file', './uploads/company')
   async create(
-    @Body() body:CreateCompanyDto, 
-    @UploadedFile() file:Express.Multer.File,
-    @GetCurrentUser('userId') userId:string
-  ):Promise<ResponseOnceCompanyDto>{
-    return this.companyProfileService.create(body, file, userId)
+    @Body() body: CreateCompanyDto,
+    @UploadedFile() file: Express.Multer.File,
+    @GetCurrentUser('userId') userId: string,
+  ): Promise<ResponseOnceCompanyDto> {
+    return this.companyProfileService.create(body, file, userId);
   }
 
   @Get('read')
   @Public()
-  async read(@Query() query: ReadCompanyDto):Promise<ResponseAllCompanyDto>{
-    return this.companyProfileService.read(query)
+  async read(@Query() query: ReadCompanyDto): Promise<ResponseAllCompanyDto> {
+    return this.companyProfileService.read(query);
+  }
+
+  @Get('read/me')
+  async readMe(@GetCurrentUser('userId') userId: string) {
+    return this.companyProfileService.readMe(userId);
   }
 
   @Get('readOne/:id')
   @Public()
-  async readOne(@Param('id') id:string){
-    return this.companyProfileService.readOne(id)
+  async readOne(@Param('id') id: string) {
+    return this.companyProfileService.readOne(id);
   }
 
   @Patch('update/:id')
   @ApiConsumes('multipart/form-data')
   @UploadSingle('file', './uploads/company')
   async update(
-    @Param('id') id:string, 
-    @Body() body:UpdateCompanyDto, 
-    @UploadedFile() file?: Express.Multer.File
-  ){
-    return this.companyProfileService.update(id, body, file)
+    @Param('id') id: string,
+    @Body() body: UpdateCompanyDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.companyProfileService.update(id, body, file);
   }
 
   @Delete('delete/:id')
-  async delete(@Param('id') id:string){
-    return this.companyProfileService.delete(id)
+  async delete(@Param('id') id: string) {
+    return this.companyProfileService.delete(id);
   }
-
 }

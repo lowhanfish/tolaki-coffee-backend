@@ -33,10 +33,10 @@ export class CreateProductDto {
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ format: 'uuid', required: false })
+  @ApiProperty({ format: 'uuid' })
   @IsUUID()
-  @IsOptional()
-  companyProfileId?: string;
+  @IsNotEmpty()
+  companyProfileId: string;
 
   @ApiProperty({
     type: 'array',

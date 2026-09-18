@@ -37,8 +37,8 @@ export class CreateContactDto {
     email? :string;
 
     @IsUUID()
-    @IsNotEmpty()
-    companyProfileId: string;
+    @IsOptional()
+    companyProfileId?: string;
 
     @IsOptional()
     @IsString()
@@ -94,4 +94,26 @@ export class ResponseContactDto {
     skip : number;
     limit : number;
     data : ResponseContactOnceDto[]
+}
+
+export class CreateInquiryDto {
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
+
+    @IsOptional()
+    @IsString()
+    phone?: string;
+
+    @IsString()
+    @IsNotEmpty()
+    subject: string;
+
+    @IsString()
+    @IsNotEmpty()
+    message: string;
 }

@@ -9,9 +9,22 @@ export class PartnerService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createPartnerDto: CreatePartnerDto, userId: string) {
+    let companyProfileId = createPartnerDto.companyProfileId;
+    if (!companyProfileId) {
+      const comp =
+        (await this.prisma.companyProfile.findFirst({
+          where: { createdBy: userId },
+        })) || (await this.prisma.companyProfile.findFirst());
+      if (!comp) {
+        throw new NotFoundException('Silakan buat profil perusahaan terlebih dahulu.');
+      }
+      companyProfileId = comp.id;
+    }
+
     return this.prisma.partner.create({
       data: {
         ...createPartnerDto,
+        companyProfileId,
         createdBy: userId,
       },
     });

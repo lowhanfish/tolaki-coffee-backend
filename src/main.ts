@@ -1,25 +1,35 @@
 import { NestFactory } from '@nestjs/core';
-import {ValidationPipe} from '@nestjs/common'
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   app.use(cookieParser()); // Gunakan middleware cookie-parser
 
   app.enableCors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"], // Domin yang diizinkan (Next.js)
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'], // Domin yang diizinkan (Next.js)
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist :true,
-    forbidNonWhitelisted : true,
-    transform : true
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Kopi Tolaki')
