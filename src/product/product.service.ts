@@ -22,6 +22,7 @@ export class ProductService {
         (await this.prisma.companyProfile.findFirst({
           where: { createdBy: userId },
         })) || (await this.prisma.companyProfile.findFirst());
+
       if (!comp) {
         throw new NotFoundException(
           'Silakan buat profil perusahaan terlebih dahulu.',
@@ -31,6 +32,7 @@ export class ProductService {
     }
 
     const { files: _files, companyProfileId: _, ...productData } = dto;
+
     const product = await this.prisma.$transaction(async (tx) => {
       const createdProduct = await tx.product.create({
         data: {
@@ -39,6 +41,7 @@ export class ProductService {
           createdBy: userId,
         },
       });
+
       if (files?.length) {
         await tx.file.createMany({
           data: files.map((file) => ({
@@ -53,6 +56,7 @@ export class ProductService {
       }
       return createdProduct;
     });
+
     return this.findOne(product.id);
   }
 
@@ -68,6 +72,7 @@ export class ProductService {
           ],
         }
       : {};
+
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
@@ -77,6 +82,7 @@ export class ProductService {
       }),
       this.prisma.product.count({ where }),
     ]);
+
     const files = products.length
       ? await this.prisma.file.findMany({
           where: {
@@ -86,10 +92,12 @@ export class ProductService {
           orderBy: { createdAt: 'desc' },
         })
       : [];
+
     const data = products.map((product) => ({
       ...product,
       files: files.filter((file) => file.table_id === product.id),
     }));
+
     return { total, skip, limit, data };
   }
 
@@ -101,6 +109,7 @@ export class ProductService {
       where: { table_name: PRODUCT_TABLE_NAME, table_id: id },
       orderBy: { createdAt: 'desc' },
     });
+
     return { ...product, files };
   }
 
