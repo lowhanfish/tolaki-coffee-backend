@@ -19,9 +19,13 @@ import { Public } from '../common/decorators/public.decorator';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  // Di sinilah tempat pesanan di buat. pastikan raja ongkir di pasang di sini
+  // sebaiknya jadikan interceptor atau decorator
+
   @Post('create')
   @Public()
   create(@Body() dto: CreateOrderDto) {
+    console.log(dto);
     return this.orderService.create(dto);
   }
 
@@ -42,10 +46,7 @@ export class OrderController {
   }
 
   @Patch('update-status/:id')
-  updateStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateOrderStatusDto,
-  ) {
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.orderService.updateStatus(id, dto.status);
   }
 }

@@ -18,6 +18,7 @@ import { StoryFromGardenModule } from './story-from-garden/story-from-garden.mod
 import { PartnershipStandardModule } from './partnership-standard/partnership-standard.module';
 import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { OrderModule } from './order/order.module';
     PartnershipStandardModule,
     ProductModule,
     OrderModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
