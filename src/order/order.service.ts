@@ -11,34 +11,38 @@ export class OrderService {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const orderNumber = `TK-${dateStr}-${timestamp}`;
 
-    return this.prisma.$transaction(async (tx) => {
-      const order = await tx.order.create({
-        data: {
-          orderNumber,
-          customerName: dto.customerName,
-          customerPhone: dto.customerPhone,
-          customerEmail: dto.customerEmail,
-          shippingAddress: dto.shippingAddress,
-          notes: dto.notes,
-          totalAmount: dto.totalAmount,
-          status: OrderStatus.PENDING,
-          items: {
-            create: dto.items.map((item) => ({
-              productId: item.productId,
-              title: item.title,
-              price: item.price,
-              quantity: item.quantity,
-              subtotal: item.subtotal,
-            })),
-          },
-        },
-        include: {
-          items: true,
-        },
-      });
+    console.log(dto);
 
-      return order;
-    });
+    return dto;
+
+    // return this.prisma.$transaction(async (tx) => {
+    //   const order = await tx.order.create({
+    //     data: {
+    //       orderNumber,
+    //       customerName: dto.customerName,
+    //       customerPhone: dto.customerPhone,
+    //       customerEmail: dto.customerEmail,
+    //       shippingAddress: dto.shippingAddress,
+    //       notes: dto.notes,
+    //       totalAmount: dto.totalAmount,
+    //       status: OrderStatus.PENDING,
+    //       items: {
+    //         create: dto.items.map((item) => ({
+    //           productId: item.productId,
+    //           title: item.title,
+    //           price: item.price,
+    //           quantity: item.quantity,
+    //           subtotal: item.subtotal,
+    //         })),
+    //       },
+    //     },
+    //     include: {
+    //       items: true,
+    //     },
+    //   });
+
+    //   return order;
+    // });
   }
 
   async findAll(query: ReadOrderDto) {

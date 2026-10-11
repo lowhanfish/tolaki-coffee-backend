@@ -20,6 +20,9 @@ export enum OrderStatus {
 }
 
 export class OrderItemDto {
+  @IsNumber()
+  stock_existing?: number = 0;
+
   @IsString()
   @IsNotEmpty()
   productId: string;

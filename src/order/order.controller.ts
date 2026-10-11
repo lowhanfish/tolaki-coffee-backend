@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import {
@@ -14,6 +15,7 @@ import {
   UpdateOrderStatusDto,
 } from './dto/order.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { CheckProducts } from 'src/common/interceptors/check-products.interceptor';
 
 @Controller('order')
 export class OrderController {
@@ -24,6 +26,7 @@ export class OrderController {
 
   @Post('create')
   @Public()
+  @UseInterceptors(CheckProducts)
   create(@Body() dto: CreateOrderDto) {
     console.log(dto);
     return this.orderService.create(dto);

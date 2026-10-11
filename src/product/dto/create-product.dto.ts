@@ -4,6 +4,8 @@ import {
   Allow,
   IsNotEmpty,
   IsNumber,
+  IsInt,
+  Min,
   IsOptional,
   IsString,
   IsUUID,
@@ -24,6 +26,16 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   unit_price: string;
+
+  @ApiProperty({
+    example: 100,
+    description: 'Jumlah stok produk',
+    default: 0,
+  })
+  @Type(() => Number)
+  @IsInt({ message: 'Stock harus berupa bilangan bulat' }) // 2. Validasi tipe number
+  @Min(0, { message: 'Stock tidak boleh kurang dari 0' })
+  stock: number;
 
   @ApiProperty({
     example: 'Kopi arabika pilihan dari kebun Tolaki',
