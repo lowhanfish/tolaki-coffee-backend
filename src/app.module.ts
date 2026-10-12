@@ -19,6 +19,7 @@ import { PartnershipStandardModule } from './partnership-standard/partnership-st
 import { ProductModule } from './product/product.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { PaymentModule } from './payment/payment.module';
     ProductModule,
     OrderModule,
     PaymentModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [
